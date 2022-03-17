@@ -11,7 +11,7 @@
             </validation-provider>
 
             <v-btn block class="green mr-4" :disabled="invalid">登入</v-btn>
-            <v-btn block class="green mr-4"  @click="test">測試</v-btn>
+            <!-- <v-btn block class="green mr-4"  @click="test">測試</v-btn> -->
         </form>
     </validation-observer>
     </v-card>
