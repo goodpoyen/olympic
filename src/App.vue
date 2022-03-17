@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-main :style="{'background-image':'url(/images/test2.png)','background-size': 'cover', 'background-repeat': 'no-repeat'}">
+    <v-main>
       <router-view/>
     </v-main>
      <v-footer dark padless>
@@ -8,8 +8,6 @@
         台灣奧林匹亞 copyright © {{ new Date().getFullYear() }} 
       </v-card-text></v-footer>
   </v-app>
-
- 
 </template>
 
 <script>
