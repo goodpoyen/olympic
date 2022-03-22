@@ -16,17 +16,22 @@ const routes = [
 		component: () => import('../views/loginView.vue')
 	},
 	{
+		path: '/forget',
+		name: 'forget',
+		component: () => import('../views/forgetView.vue')
+	},
+	{	
 		path: '/manage',
 		name: 'manage',
-		component: () => import('../views/manageView.vue'),
+		component: () => import('../views/manageView'),
 		children: [
 			{
 			  path: "/manage/signup",
 			  name: "signup",
-			  component: () => import("../components/signup.vue")
+			  component: () => import("../components/signup")
 			},
 			{
-				path: "/manage/account",
+				path: "manage/account",
 				name: "account",
 				component: () => import("../components/account.vue")
 			  },
@@ -36,7 +41,7 @@ const routes = [
 
 const router = new VueRouter({
 	mode: 'history',
-	base: process.env.VUE_APP_LOCALURL,
+	// base: process.env.VUE_APP_LOCALURL,
 	routes
 })
 

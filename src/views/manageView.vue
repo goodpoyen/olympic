@@ -84,15 +84,15 @@ export default {
     methods: {
 		route(path, param) {
 			if (path == 'account'){
-				this.$router.push ({ path: '/manage/account'})
+				this.$router.push ({ path: 'manage/account'})
 				// console.log(this.$router.path)
-				window.history.pushState('page2', 'Title', '/manage/account');
+				// window.history.pushState('page2', 'Title', '/manage/account');
 			}
 
 			if (path == 'signup'){
 				this.$router.push ({ path: '/manage/signup', query: { id: param }})
 				// console.log(this.$router.path)
-				window.history.pushState('page2', 'Title', '/manage/signup?id=' + param);
+				// window.history.pushState('page2', 'Title', '/manage/signup?id=' + param);
 			}
 
 		},
