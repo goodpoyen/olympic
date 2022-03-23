@@ -26,22 +26,21 @@ const routes = [
 		component: () => import('../views/manageView'),
 		children: [
 			{
-			  path: "/manage/signup",
-			  name: "signup",
-			  component: () => import("../components/signup")
+				path: "manage/signup",
+				name: "signup",
+				component: () => import("../components/signup")
 			},
 			{
 				path: "manage/account",
 				name: "account",
 				component: () => import("../components/account.vue")
-			  },
+			},
 		]
 	},
 ]
 
 const router = new VueRouter({
 	mode: 'history',
-	// base: process.env.VUE_APP_LOCALURL,
 	routes
 })
 

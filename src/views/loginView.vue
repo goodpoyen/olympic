@@ -13,7 +13,7 @@
 						<v-text-field v-model="password" :error-messages="errors" label="密碼" :type="'password'" required></v-text-field>
 					</validation-provider>
                 	<v-btn block class="green mr-4" :disabled="invalid"  @click="login">登入</v-btn>
-                    <v-btn block class="green mr-4"  @click="login">登入</v-btn>
+                    <!-- <v-btn block class="green mr-4"  @click="login">登入</v-btn> -->
             	</form>
                 <a href="/forget" target="_blank" style="padding: 20px;">? 忘記密碼</a>
 			</validation-observer>
@@ -52,23 +52,28 @@ export default {
             let user = new Object()
             user.account = this.account
             user.password = this.password
-            console.log(this.GLOBAL.APISERVERURL)
-            console.log(process.env.VUE_APP_MODEENV)
 
-        //    this.test()
-        //     test.log()
             axios.post(this.GLOBAL.APISERVERURL + '/login', user)
-            .then(function (response) {
+            .then((response) => {
                 console.log(response.data)
 
                 if (response.data.code == 200){
-                    location.href = "/manage"
+                    this.store('act', response.data.resultData.act, '1800000');
+                    this.store('ret', response.data.resultData.ret, '1800000');
+                    // // location.href = "/manage"
                 }
             })
             .catch(function (error) {
                 console.log(error);
             });
         }
-    }
+    },
+
+    mounted () {
+        if (this.checkLogin()){
+            location.href = "/manage"
+        }
+    },
+    
 }
 </script>
