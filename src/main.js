@@ -7,10 +7,10 @@ import './utils/token'
 
 Vue.config.productionTip = false
 
-Vue.prototype.GLOBAL = GlobalConstant;
+Vue.prototype.GLOBAL = GlobalConstant
 
 new Vue({
-	router,
-	vuetify,
-	render: h => h(App)
+  router,
+  vuetify,
+  render: h => h(App)
 }).$mount('#app')
