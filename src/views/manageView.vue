@@ -83,7 +83,7 @@ export default {
   methods: {
     route (path, param) {
       if (path === 'account') {
-        this.$router.push({ path: 'manage/account' })
+        this.$router.push({ path: '/manage/account' })
         // console.log(this.$router.path)
         // window.history.pushState('page2', 'Title', '/manage/account');
       }

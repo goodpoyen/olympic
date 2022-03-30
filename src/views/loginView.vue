@@ -38,7 +38,7 @@
           <v-btn block class="green mr-4" :disabled="invalid" @click="login"
             >登入</v-btn
           >
-          <!-- <v-btn block class="green mr-4"  @click="login">登入</v-btn> -->
+          <!-- <v-btn block class="green mr-4"  @click="test">登入</v-btn> -->
         </form>
         <a href="/forget" target="_blank" style="padding: 20px">? 忘記密碼</a>
       </validation-observer>
@@ -49,7 +49,6 @@
 <script>
 import { required, email } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate'
-import axios from 'axios'
 // import test from '../utils/test.js'
 
 extend('required', {
@@ -73,13 +72,12 @@ export default {
   }),
 
   methods: {
-    login () {
-      //   const user = new Object()
+    async login () {
       const user = {}
       user.account = this.account
       user.password = this.password
 
-      axios
+      await this.axios
         .post(this.GLOBAL.APISERVERURL + '/login', user)
         .then((response) => {
           console.log(response.data)
@@ -94,11 +92,29 @@ export default {
           console.log(error)
         })
     }
+
+    // async test () {
+    //   await this.axios
+    //     .post(this.GLOBAL.APISERVERURL + '/test', {})
+    //     .then((response) => {
+    //       console.log(response.data)
+
+    //       if (response.data.code === 400) {
+    //         const status = this.getAT()
+    //         if (status) {
+    //           console.log(5555)
+    //         }
+    //       }
+    //     })
+    //     .catch(function (error) {
+    //       console.log(error)
+    //     })
+    // }
   },
 
   mounted () {
     if (this.checkLogin()) {
-      location.href = '/manage'
+      // location.href = '/manage'
     }
   }
 }
