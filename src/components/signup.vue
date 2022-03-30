@@ -82,7 +82,7 @@ export default {
         value: 'olympic'
       },
       { text: '姓名', value: 'name' },
-      { text: '識別碼', value: 'idCard' },,
+      { text: '識別碼', value: 'idCard' },
       { text: '學校', value: 'schoolName' },
       { text: '年級', value: 'grade' },
       { text: '生日', value: 'birthday' },

@@ -1,4 +1,3 @@
-/* eslint-disable eqeqeq */
 <template>
   <v-main
     :style="{
@@ -35,12 +34,42 @@
               required
             ></v-text-field>
           </validation-provider>
+          <validation-provider
+            v-slot="{ errors }"
+            name="驗證碼"
+            rules="required"
+          >
+            <v-text-field
+              v-model="verifycode"
+              :error-messages="errors"
+              label="驗證碼"
+              :type="'verifycode'"
+              required
+            ></v-text-field>
+            <s-identify
+              :identifyCode="identifyCode"
+              style="display: inline"
+            ></s-identify>
+            <v-btn icon color="green" @click="refreshCode">
+              <v-icon>mdi-cached</v-icon>
+            </v-btn>
+          </validation-provider>
+          <v-alert
+            v-show="alertShow"
+            outlined
+            type="warning"
+            prominent
+            border="left"
+          >
+            {{errorMsg}}
+          </v-alert>
+
           <v-btn block class="green mr-4" :disabled="invalid" @click="login"
             >登入</v-btn
           >
           <!-- <v-btn block class="green mr-4"  @click="test">登入</v-btn> -->
         </form>
-        <a href="/forget" target="_blank" style="padding: 20px">? 忘記密碼</a>
+        <!-- <a href="/forget" target="_blank" style="padding: 20px">? 忘記密碼</a> -->
       </validation-observer>
     </v-card>
   </v-main>
@@ -49,6 +78,7 @@
 <script>
 import { required, email } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate'
+import SIdentify from '../components/identify.vue'
 // import test from '../utils/test.js'
 
 extend('required', {
@@ -64,11 +94,17 @@ extend('email', {
 export default {
   components: {
     ValidationProvider,
-    ValidationObserver
+    ValidationObserver,
+    SIdentify
   },
   data: () => ({
     account: '',
-    password: ''
+    password: '',
+    verifycode: '',
+    identifyCode: '',
+    identifyCodes: '3456789ABCDEFGHGKMNPQRSTUVWXY',
+    alertShow: false,
+    errorMsg: ''
   }),
 
   methods: {
@@ -76,6 +112,14 @@ export default {
       const user = {}
       user.account = this.account
       user.password = this.password
+      console.log(this.identifyCode)
+
+      if (this.verifycode !== this.identifyCode) {
+        this.alertShow = true
+        this.errorMsg = '驗證碼錯誤'
+        this.verifycode = ''
+        return false
+      }
 
       await this.axios
         .post(this.GLOBAL.APISERVERURL + '/login', user)
@@ -91,6 +135,22 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
+    },
+
+    randomNum (min, max) {
+      return Math.floor(Math.random() * (max - min) + min)
+    },
+
+    refreshCode () {
+      this.identifyCode = ''
+      this.makeCode(this.identifyCodes, 4)
+    },
+
+    makeCode (o, l) {
+      for (let i = 0; i < l; i++) {
+        this.identifyCode +=
+          this.identifyCodes[this.randomNum(0, this.identifyCodes.length)]
+      }
     }
 
     // async test () {
@@ -114,8 +174,12 @@ export default {
 
   mounted () {
     if (this.checkLogin()) {
+      console.log(99)
       // location.href = '/manage'
     }
+
+    this.identifyCode = ''
+    this.makeCode(this.identifyCodes, 4)
   }
 }
 </script>
