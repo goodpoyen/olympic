@@ -21,13 +21,11 @@ module.exports = defineConfig({
   configureWebpack: {
     output: {
       filename: '[name].[hash:8].js'
-      // chunkFilename: 'utils/[name].[hash:8].js'
     }
   },
   chainWebpack: config => {
     config.optimization.minimize(true)
     config.optimization.splitChunks({
-      // minimize: true,
       chunks: 'all',
       maxInitialRequests: Infinity,
       maxSize: 20000,

@@ -112,9 +112,8 @@ export default {
       const user = {}
       user.account = this.account
       user.password = this.password
-      console.log(this.identifyCode)
 
-      if (this.verifycode !== this.identifyCode) {
+      if (this.verifycode.toLowerCase() !== this.identifyCode.toLowerCase()) {
         this.alertShow = true
         this.errorMsg = '驗證碼錯誤'
         this.verifycode = ''
@@ -174,7 +173,6 @@ export default {
 
   mounted () {
     if (this.checkLogin()) {
-      console.log(99)
       // location.href = '/manage'
     }
 
