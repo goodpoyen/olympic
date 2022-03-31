@@ -37,11 +37,12 @@
           <validation-provider
             v-slot="{ errors }"
             name="驗證碼"
-            rules="required"
+            rules="required|max:4"
           >
             <v-text-field
               v-model="verifycode"
               :error-messages="errors"
+              :counter="4"
               label="驗證碼"
               :type="'verifycode'"
               required
@@ -61,7 +62,7 @@
             prominent
             border="left"
           >
-            {{errorMsg}}
+            {{ errorMsg }}
           </v-alert>
 
           <v-btn block class="green mr-4" :disabled="invalid" @click="login"
@@ -76,7 +77,7 @@
 </template>
 
 <script>
-import { required, email } from 'vee-validate/dist/rules'
+import { required, email, max } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider } from 'vee-validate'
 import SIdentify from '../components/identify.vue'
 // import test from '../utils/test.js'
@@ -89,6 +90,11 @@ extend('required', {
 extend('email', {
   ...email,
   message: '帳號格式不對'
+})
+
+extend('max', {
+  ...max,
+  message: '{_field_} 不能超過 {length} 字元'
 })
 
 export default {
@@ -123,8 +129,6 @@ export default {
       await this.axios
         .post(this.GLOBAL.APISERVERURL + '/login', user)
         .then((response) => {
-          console.log(response.data)
-
           if (response.data.code === 200) {
             this.store('act', response.data.resultData.act, '1800000')
             this.store('ret', response.data.resultData.ret, '1800000')
