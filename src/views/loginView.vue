@@ -68,7 +68,16 @@
           <v-btn block class="green mr-4" :disabled="invalid" @click="login"
             >登入</v-btn
           >
-          <!-- <v-btn block class="green mr-4"  @click="test">登入</v-btn> -->
+          <v-alert
+            v-show="dialog"
+            border="left"
+            colored-border
+            type="error"
+            elevation="2"
+            style="margin-top: 20px"
+          >
+            {{ dialogMsg }}
+          </v-alert>
         </form>
         <!-- <a href="/forget" target="_blank" style="padding: 20px">? 忘記密碼</a> -->
       </validation-observer>
@@ -110,8 +119,33 @@ export default {
     identifyCode: '',
     identifyCodes: '3456789ABCDEFGHGKMNPQRSTUVWXY',
     alertShow: false,
-    errorMsg: ''
+    errorMsg: '',
+    dialogMsg: '',
+    dialog: false
   }),
+
+  watch: {
+    verifycode: function () {
+      if (this.verifycode !== '') {
+        this.errorMsg = ''
+        this.alertShow = false
+        this.dialogMsg = ''
+        this.dialog = false
+      }
+    },
+    account: function () {
+      if (this.account !== '') {
+        this.dialogMsg = ''
+        this.dialog = false
+      }
+    },
+    password: function () {
+      if (this.password !== '') {
+        this.dialogMsg = ''
+        this.dialog = false
+      }
+    }
+  },
 
   methods: {
     async login () {
@@ -129,10 +163,20 @@ export default {
       await this.axios
         .post(this.GLOBAL.APISERVERURL + '/login', user)
         .then((response) => {
+          console.log(response.data)
           if (response.data.code === 200) {
             this.store('act', response.data.resultData.act, '1800000')
             this.store('ret', response.data.resultData.ret, '1800000')
-            // // location.href = "/manage"
+            this.store('level', response.data.resultData.level, '1800000')
+            this.store('olympic', response.data.resultData.olympic, '1800000')
+            location.href = '/manage'
+          } else if (response.data.code === 201 || response.data.code === 501) {
+            this.dialogMsg = '帳號密碼有誤'
+            this.dialog = true
+            this.account = ''
+            this.password = ''
+            this.verifycode = ''
+            this.refreshCode()
           }
         })
         .catch(function (error) {
@@ -155,31 +199,9 @@ export default {
           this.identifyCodes[this.randomNum(0, this.identifyCodes.length)]
       }
     }
-
-    // async test () {
-    //   await this.axios
-    //     .post(this.GLOBAL.APISERVERURL + '/test', {})
-    //     .then((response) => {
-    //       console.log(response.data)
-
-    //       if (response.data.code === 400) {
-    //         const status = this.getAT()
-    //         if (status) {
-    //           console.log(5555)
-    //         }
-    //       }
-    //     })
-    //     .catch(function (error) {
-    //       console.log(error)
-    //     })
-    // }
   },
 
   mounted () {
-    if (this.checkLogin()) {
-      // location.href = '/manage'
-    }
-
     this.identifyCode = ''
     this.makeCode(this.identifyCodes, 4)
   }

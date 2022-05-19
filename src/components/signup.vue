@@ -1,80 +1,147 @@
 <template>
-    <div>
-        <v-data-table :headers="headers" :items="desserts" multi-sort class="elevation-1" :search="search">
-            <template v-slot:top>
-                <v-toolbar flat>
-                    <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
-                    <v-spacer></v-spacer>
-                    <v-dialog v-model="dialog" max-width="500px">
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                                新增報名
-                            </v-btn>
-                        </template>
-                        <v-card>
-                            <v-card-title>
-                                <span class="text-h5">{{ formTitle }}</span>
-                            </v-card-title>
-
-                            <v-card-text>
-                                <v-container>
-                                    <v-row>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.name" label="姓名"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.idCard" label="識別碼"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.schoolName" label="學校"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.grade" label="年級"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.birthday" label="生日"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.email" label="信箱"></v-text-field>
-                                        </v-col>
-                                    </v-row>
-                                </v-container>
-                            </v-card-text>
-
-                            <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn color="blue darken-1" text @click="close">取消</v-btn>
-                                <v-btn color="blue darken-1" text @click="save">儲存</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
-                    <v-dialog v-model="dialogDelete" max-width="500px">
-                        <v-card>
-                            <v-card-title class="text-h5">確定刪除此學生報名資訊？</v-card-title>
-                            <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn color="blue darken-1" text @click="closeDelete">取消</v-btn>
-                                <v-btn color="blue darken-1" text @click="deleteItemConfirm">確定</v-btn>
-                                <v-spacer></v-spacer>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
-                </v-toolbar>
+  <div>
+    <v-data-table
+      v-model="selected"
+      :headers="headers"
+      :items="desserts"
+      :items-per-page="3"
+      multi-sort
+      :search="search"
+      :single-select="singleSelect"
+      show-select
+      item-key="name"
+      class="elevation-1"
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-text-field
+            v-model="search"
+            append-icon="mdi-magnify"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+          <v-spacer></v-spacer>
+          <v-dialog v-model="dialog" max-width="500px">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
+                新增報名
+              </v-btn>
             </template>
-            <template v-slot:item.actions="{ item }">
-                <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-                <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
-            </template>
-        </v-data-table>
-    </div>
+            <v-card>
+              <v-card-title>
+                <span class="text-h5">{{ formTitle }}</span>
+              </v-card-title>
+
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.name"
+                        label="姓名"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.idCard"
+                        label="識別碼"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.schoolName"
+                        label="學校"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.grade"
+                        label="年級"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.birthday"
+                        label="生日"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-text-field
+                        v-model="editedItem.email"
+                        label="信箱"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="4">
+                      <v-radio-group v-model="column" column>
+                        <v-radio label="Option 1" value="radio-1"></v-radio>
+                        <v-radio label="Option 2" value="radio-2"></v-radio>
+                      </v-radio-group>
+                    </v-col>
+                     <v-col cols="12" sm="6" md="4">
+                      <v-datetime-picker v-model="datetime"></v-datetime-picker>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="close">取消</v-btn>
+                <v-btn color="blue darken-1" text @click="save">儲存</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <v-dialog v-model="dialogDelete" max-width="500px">
+            <v-card>
+              <v-card-title class="text-h5"
+                >確定刪除此學生報名資訊？</v-card-title
+              >
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="closeDelete"
+                  >取消</v-btn
+                >
+                <v-btn color="blue darken-1" text @click="deleteItemConfirm"
+                  >確定</v-btn
+                >
+                <v-spacer></v-spacer>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-toolbar>
+        <v-btn class="mx-2" fab dark x-small color="grey">
+          <v-icon dark> mdi-format-list-bulleted-square </v-icon>
+        </v-btn>
+        <div style="display: inline">
+          <v-btn class="mx-2" fab dark x-small color="grey">
+            <v-icon dark> mdi-delete </v-icon>
+          </v-btn>
+          <v-btn class="mx-2" fab dark x-small color="grey">
+            <v-icon dark> mdi-email-outline </v-icon>
+          </v-btn>
+        </div>
+      </template>
+      <template v-slot:item.actions="{ item }">
+        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+        <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
+      </template>
+    </v-data-table>
+  </div>
 </template>
 
 <script>
+import DatetimePicker from '../components/DatetimePicker'
 export default {
+  components: {
+    'v-datetime-picker': DatetimePicker
+  },
   data: () => ({
     search: '',
     dialog: false,
     dialogDelete: false,
+    singleSelect: false,
+    selected: [],
     headers: [
       {
         text: '奧林匹亞',
@@ -221,7 +288,6 @@ export default {
           birthday: '2008/01/12',
           email: 'KitKat@gmail.com'
         }
-
       ]
     },
 

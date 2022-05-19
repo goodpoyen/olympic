@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app v-show="loginShow">
     <v-main>
       <router-view />
     </v-main>
@@ -13,6 +13,27 @@
 
 <script>
 export default {
-  data: () => ({})
+  data: () => ({
+    loginShow: false
+  }),
+
+  async mounted () {
+    const currentUrl = window.location.pathname
+
+    if (currentUrl === '/login') {
+      this.loginShow = true
+    }
+
+    if (!await this.checkLogin()) {
+      if (currentUrl !== '/login') {
+        location.href = '/login'
+      }
+    } else {
+      this.loginShow = true
+      if (currentUrl === '/login') {
+        location.href = '/manage'
+      }
+    }
+  }
 }
 </script>

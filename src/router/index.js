@@ -7,8 +7,7 @@ const routes = [
   {
     path: '/',
     name: 'login',
-    redirect: '/login',
-    component: () => import('../views/loginView.vue')
+    redirect: '/manage'
   },
   {
     path: '/login',
@@ -23,17 +22,22 @@ const routes = [
   {
     path: '/manage',
     name: 'manage',
-    component: () => import('../views/manageView'),
+    component: () => import('../views/manageView.vue'),
     children: [
       {
         path: 'signup',
         name: 'signup',
-        component: () => import('../components/signup')
+        component: () => import('../components/signup.vue')
       },
       {
         path: 'account',
         name: 'account',
         component: () => import('../components/account.vue')
+      },
+      {
+        path: 'schoolUser',
+        name: 'schoolUser',
+        component: () => import('../components/schoolUser.vue')
       }
     ]
   }

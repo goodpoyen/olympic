@@ -2,6 +2,13 @@ import Vue from 'vue'
 import axios from 'axios'
 
 Vue.mixin({
+  data: () => ({
+    AT: {},
+    RT: {},
+    level: '',
+    olympic: ''
+  }),
+
   methods: {
     store (key, value, expire) {
       const obj = {
@@ -24,6 +31,8 @@ Vue.mixin({
         if (new Date().getTime() - itemObj.time >= itemObj.expire) {
           localStorage.removeItem('ret')
           localStorage.removeItem('act')
+          localStorage.removeItem('level')
+          localStorage.removeItem('olympic')
           location.href = '/login'
         } else {
           this.store('ret', itemObj.value, '1800000')
@@ -46,13 +55,17 @@ Vue.mixin({
         if (new Date().getTime() - itemObj.time >= itemObj.expire) {
           localStorage.removeItem('ret')
           localStorage.removeItem('act')
+          localStorage.removeItem('level')
+          localStorage.removeItem('olympic')
           return false
         } else {
           this.store('ret', itemObj.value, '1800000')
           const status = await this.checkRT(itemObj.value)
           if (!status) {
-            // localStorage.removeItem('ret')
-            // localStorage.removeItem('act')
+            localStorage.removeItem('ret')
+            localStorage.removeItem('act')
+            localStorage.removeItem('level')
+            localStorage.removeItem('olympic')
             return false
           }
 
@@ -73,8 +86,19 @@ Vue.mixin({
         .then((response) => {
           if (response.data.code === 200) {
             status = true
-          } else {
+          } else if (response.data.code === 400) {
             status = false
+          } else if (response.data.code === 401) {
+            this.store('ret', response.data.resultData.ret, '1800000')
+            this.RT = JSON.parse(localStorage.getItem('ret'))
+            this.store('level', response.data.resultData.level, '1800000')
+            this.level = JSON.parse(localStorage.getItem('level'))
+            this.store('olympic', response.data.resultData.olympic, '1800000')
+            this.olympic = JSON.parse(localStorage.getItem('olympic'))
+            this.store('act', response.data.resultData.act, '1800000')
+            this.act = JSON.parse(localStorage.getItem('act'))
+
+            status = true
           }
         })
         .catch((err) => {
@@ -94,13 +118,15 @@ Vue.mixin({
       await axios
         .post(this.GLOBAL.APISERVERURL + '/getAT', checkData)
         .then((response) => {
-          console.log(response.data)
           if (response.data.code === 200) {
             this.store('act', response.data.resultData.act, '1800000')
+            this.AT = JSON.parse(localStorage.getItem('act'))
             status = true
           } else {
-            // localStorage.removeItem('ret')
-            // localStorage.removeItem('act')
+            localStorage.removeItem('ret')
+            localStorage.removeItem('act')
+            localStorage.removeItem('level')
+            localStorage.removeItem('olympic')
             location.href = '/login'
           }
         })
@@ -110,5 +136,12 @@ Vue.mixin({
 
       return status
     }
+  },
+
+  mounted () {
+    this.level = JSON.parse(localStorage.getItem('level'))
+    this.olympic = JSON.parse(localStorage.getItem('olympic'))
+    this.AT = JSON.parse(localStorage.getItem('act'))
+    this.RT = JSON.parse(localStorage.getItem('ret'))
   }
 })

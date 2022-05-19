@@ -25,7 +25,7 @@
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                新增帳號
+                新增承辦人
               </v-btn>
             </template>
             <v-card>
@@ -47,6 +47,14 @@
                       </v-col>
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
+                          v-model="editedItem.school_name"
+                          label="學校"
+                          :rules="[(v) => !!v || '學校不能為空']"
+                          required
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field
                           v-model="editedItem.name"
                           label="姓名"
                           :rules="[(v) => !!v || '姓名不能為空']"
@@ -56,25 +64,18 @@
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
                           v-model="editedItem.email"
-                          label="帳號(信箱)"
+                          label="信箱"
                           :rules="emailRules"
                           required
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="4">
-                        <v-radio-group
-                          v-model="editedItem.level"
-                          :rules="[(v) => !!v || '角色不能為空']"
+                      <v-col cols="12" sm="6" md="6">
+                        <v-text-field
+                          v-model="editedItem.tel"
+                          label="公務電話"
+                          :rules="[(v) => !!v || '姓名不能為空']"
                           required
-                        >
-                          角色
-                          <v-radio
-                            v-for="role in roles"
-                            :key="role.key"
-                            :label="role.key"
-                            :value="role.value"
-                          ></v-radio>
-                        </v-radio-group>
+                        ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="6" md="4">
                         <v-radio-group
@@ -84,7 +85,7 @@
                           :rules="[(v) => !!v || 'Item is required']"
                           required
                         >
-                          帳號狀態
+                          承辦人狀態
                           <v-radio
                             v-for="status in accountStatus"
                             :key="status.key"
@@ -93,7 +94,7 @@
                           ></v-radio>
                         </v-radio-group>
                         <v-radio-group v-else v-model="editedItem.status">
-                          帳號狀態
+                          承辦人狀態
                           <v-radio
                             v-for="status in accountStatus"
                             :key="status.key"
@@ -141,34 +142,17 @@
         <v-icon small class="mr-2" @click="deleteItem(item)">
           mdi-delete
         </v-icon>
-        <v-icon small class="mr-2" @click="sendPwdMail(item)">
-          mdi-email-send-outline
+        <v-icon small class="mr-2" @click="getSchoolUsers()">
+          mdi-delete
         </v-icon>
       </template>
     </v-data-table>
-    <v-snackbar
-      v-model="snackbar"
-      :multi-line="true"
-      :timeout="2000"
-      absolute
-      outlined
-      color="success"
-      top
-    >
-      <v-icon color="red darken-2">mdi-checkbox-marked-circle</v-icon>
-      {{ snackbarMsg }}
-      <template v-slot:action="{ attrs }">
-        <v-btn color="red" text v-bind="attrs"> </v-btn>
-      </template>
-    </v-snackbar>
   </div>
 </template>
 
 <script>
 export default {
   data: () => ({
-    snackbar: false,
-    snackbarMsg: '',
     valid: true,
     search: '',
     dialog: false,
@@ -180,26 +164,15 @@ export default {
         value: 'olympic'
       },
       { text: '帳號狀態', value: 'statusName' },
-      { text: '角色', value: 'levelName' },
+      { text: '學校', value: 'school_name' },
       { text: '姓名', value: 'name' },
-      { text: '帳號 (信箱)', value: 'email' },
-      { text: '建立時間', value: 'createday' },
-      { text: '修改時間', value: 'modifyday' },
+      { text: '信箱', value: 'email' },
+      { text: '公務電話', value: 'tel' },
       { text: '功能', value: 'actions', sortable: false }
     ],
     emailRules: [
       v => !!v || '帳號(信箱)不能為空',
       v => /.+@.+/.test(v) || '帳號(信箱)格式不對'
-    ],
-    roles: [
-      {
-        key: '系統管理員',
-        value: '1'
-      },
-      {
-        key: '專任助理',
-        value: '2'
-      }
     ],
     accountStatus: [
       {
@@ -209,35 +182,31 @@ export default {
       {
         key: '停權',
         value: '2'
-      },
-      {
-        key: '認證',
-        value: '3'
       }
     ],
-    defaultStatus: '3',
+    defaultStatus: '2',
     olympicItem: ['TMO', 'IPHO', 'TWICHO', 'CTBO', 'IESO', 'TWIJSO', 'TOI'],
     desserts: [],
     editedIndex: -1,
     editedItem: {
       olympic: '',
+      schoolName: '',
       name: '',
       email: '',
-      status: '',
-      level: ''
+      tel: ''
     },
     defaultItem: {
       olympic: '',
+      schoolName: '',
       name: '',
       email: '',
-      status: '',
-      level: ''
+      tel: ''
     }
   }),
 
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? '新增帳號' : '更新帳號資訊'
+      return this.editedIndex === -1 ? '新增承辦人' : '更承辦人資訊'
     }
   },
 
@@ -252,14 +221,12 @@ export default {
 
   methods: {
     editItem (item) {
-      this.renewLT()
       this.editedIndex = this.desserts.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
 
     deleteItem (item) {
-      this.renewLT()
       this.editedIndex = this.desserts.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogDelete = true
@@ -288,15 +255,9 @@ export default {
     },
 
     save () {
-      this.renewLT()
-      const nowData = this.getNowDataTime()
-
       if (this.editedIndex === -1) {
-        this.editedItem.status = '3'
-        this.editedItem.createday = nowData
+        this.editedItem.status = '2'
       }
-
-      this.editedItem.modifyday = nowData
 
       this.editedItem = this.changeData(this.editedItem)
 
@@ -306,27 +267,15 @@ export default {
         this.desserts.push(this.editedItem)
       }
 
-      this.createAccount(this.editedItem)
-
       this.close()
     },
 
     changeData (data) {
-      if (data.level === '1') {
-        data.levelName = '系統管理員'
-      }
-      if (data.level === '2') {
-        data.levelName = '專任助理'
-      }
-
       if (data.status === '1') {
         data.statusName = '啟用'
       }
       if (data.status === '2') {
         data.statusName = '停權'
-      }
-      if (data.status === '3') {
-        data.statusName = '認證'
       }
 
       return data
@@ -338,14 +287,12 @@ export default {
       else return 'green'
     },
 
-    async getAccountList () {
-      this.renewLT()
-
+    async getSchoolUsers () {
       const data = {}
       data.AT = this.AT.value
 
       await this.axios
-        .post(this.GLOBAL.APISERVERURL + '/getAccountList', data)
+        .post(this.GLOBAL.APISERVERURL + '/getSchoolUsers', data)
         .then((response) => {
           if (response.data.code === 200) {
             this.desserts = response.data.resultData
@@ -353,11 +300,12 @@ export default {
             this.desserts.forEach(function (data) {
               data = that.changeData(data)
             })
+            console.log(this.desserts)
           } else if (response.data.code === 400) {
             if (this.getAT()) {
               const that = this
               setTimeout(function () {
-                that.getAccountList()
+                that.getSchoolUsers()
               }, 1000)
             } else {
               location.href = '/login'
@@ -369,56 +317,13 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
-    },
-
-    async createAccount (item) {
-      this.renewLT()
-
-      const data = {}
-      data.AT = this.AT.value
-      data.olympic = item.olympic
-      data.name = item.name
-      data.email = item.email
-      data.status = item.status
-      data.level = item.level
-      data.modifyday = item.modifyday
-      data.createday = item.createday
-
-      console.log(item)
-
-      // await this.axios
-      //   .post(this.GLOBAL.APISERVERURL + '/createAccount', data)
-      //   .then((response) => {
-      //     if (response.data.code === 200) {
-      //       this.desserts = response.data.resultData
-      //     } else if (response.data.code === 400) {
-      //       if (this.getAT()) {
-      //         const that = this
-      //         setTimeout(function () {
-      //           that.createAccount()
-      //         }, 1000)
-      //       } else {
-      //         location.href = '/login'
-      //       }
-      //     } else if (response.data.code === 401) {
-      //       location.reload()
-      //     }
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error)
-      //   })
-    },
-
-    sendPwdMail (item) {
-      this.snackbar = true
-      this.snackbarMsg = item.name + ' --密碼通知信已寄出'
     }
   },
 
   async mounted () {
     // console.log(this.level.value)
     await this.renewLT()
-    await this.getAccountList()
+    await this.getSchoolUsers()
   }
 }
 </script>

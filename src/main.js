@@ -5,6 +5,7 @@ import vuetify from './plugins/vuetify'
 import axios from 'axios'
 import GlobalConstant from './components/config/GlobalConstant.vue'
 import './utils/token'
+import './utils/tool'
 
 Vue.config.productionTip = false
 
