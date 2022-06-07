@@ -40,106 +40,20 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app>
+    <v-app-bar dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>選拔支援系統</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon @click="logout">
+        <v-icon>mdi-export</v-icon>
+      </v-btn>
     </v-app-bar>
-    <!-- <v-card class="mx-auto" max-width="80%" tile style="margin-top: 10px">
-      <v-simple-table>
-        <template v-slot:default>
-          <thead>
-            <tr>
-              <th class="text-left">選拔代碼</th>
-              <th class="text-left">類別</th>
-              <th class="text-left">選拔名稱</th>
-              <th class="text-left">報名時間</th>
-              <th class="text-left">功能</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>A</td>
-              <td>TOI</td>
-              <td>2022台灣資訊奧林匹亞初選選拔賽</td>
-              <td>2022/04/01 00:00 ~ 2022/04/14 23:59</td>
-              <td>
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px"
-                  >考場設定</v-btn
-                >
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px"
-                  >報名欄位設定</v-btn
-                >
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px"
-                  >報名資料</v-btn
-                >
-
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px; margin-bottom: 10px"
-                  >參賽資料</v-btn
-                >
-              </td>
-            </tr>
-            <tr>
-              <td>A</td>
-              <td>TOI</td>
-              <td>2022台灣資訊奧林匹亞初選選拔賽</td>
-              <td>2022/04/01 00:00 ~ 2022/04/14 23:59</td>
-              <td>
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px"
-                  >考場設定</v-btn
-                >
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px"
-                  >報名欄位設定</v-btn
-                >
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px"
-                  >報名資料</v-btn
-                >
-
-                <v-btn
-                  depressed
-                  color="primary"
-                  style="display: block; margin-top: 10px; margin-bottom: 10px"
-                  >參賽資料</v-btn
-                >
-              </td>
-            </tr>
-          </tbody>
-        </template>
-      </v-simple-table>
-    </v-card> -->
-    <!-- <v-datetime-picker v-model="datetime"></v-datetime-picker> -->
-
     <router-view> </router-view>
   </div>
 </template>
 
 <script>
-// import DatetimePicker from '../components/DatetimePicker'
-
 export default {
-  components: {
-    // 'v-datetime-picker': DatetimePicker
-  },
   data: () => ({
     drawer: null,
     olympicTitle: '',
@@ -157,7 +71,7 @@ export default {
         action: 'mdi-file-document-edit-outline',
         active: true,
         items: [
-          { title: '選拔管理', even: 'signup', param: '1' }
+          { title: '選拔管理', even: 'selection', param: '1' }
         ],
         title: '選拔項目'
       }
@@ -184,6 +98,20 @@ export default {
         // console.log(this.$router.path)
         // window.history.pushState('page2', 'Title', '/manage/account');
       }
+
+      if (path === 'selection') {
+        this.$router.push({ path: '/manage/selection' })
+        // console.log(this.$router.path)
+        // window.history.pushState('page2', 'Title', '/manage/account');
+      }
+    },
+
+    logout () {
+      localStorage.removeItem('ret')
+      localStorage.removeItem('act')
+      localStorage.removeItem('level')
+      localStorage.removeItem('olympic')
+      location.href = '/login'
     }
   },
 

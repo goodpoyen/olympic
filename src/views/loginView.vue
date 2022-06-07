@@ -12,7 +12,7 @@
         <div class="teal lighten-4 darken-2 text-center">
           <span class="white--text">登入</span>
         </div>
-        <form @submit.prevent="submit" style="padding: 20px">
+        <form style="padding: 20px">
           <validation-provider
             v-slot="{ errors }"
             name="帳號"
@@ -22,6 +22,7 @@
               v-model="account"
               :error-messages="errors"
               label="帳號"
+              @keyup.enter="login"
               required
             ></v-text-field>
           </validation-provider>
@@ -32,6 +33,7 @@
               label="密碼"
               :type="'password'"
               required
+              @keyup.enter="login"
             ></v-text-field>
           </validation-provider>
           <validation-provider
@@ -45,6 +47,7 @@
               :counter="4"
               label="驗證碼"
               :type="'verifycode'"
+              @keyup.enter="login"
               required
             ></v-text-field>
             <s-identify
@@ -65,7 +68,7 @@
             {{ errorMsg }}
           </v-alert>
 
-          <v-btn block class="green mr-4" :disabled="invalid" @click="login"
+          <v-btn block class="green mr-4" :disabled="invalid" @click="login()"
             >登入</v-btn
           >
           <v-alert
@@ -113,6 +116,7 @@ export default {
     SIdentify
   },
   data: () => ({
+    invalid: false,
     account: '',
     password: '',
     verifycode: '',
@@ -149,6 +153,13 @@ export default {
 
   methods: {
     async login () {
+      // eslint-disable-next-line prefer-const
+      let emailRule = /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/
+
+      if (this.password === '' || this.verifycode === '' || !emailRule.test(this.account)) {
+        return false
+      }
+
       const user = {}
       user.account = this.account
       user.password = this.password
@@ -163,7 +174,6 @@ export default {
       await this.axios
         .post(this.GLOBAL.APISERVERURL + '/login', user)
         .then((response) => {
-          console.log(response.data)
           if (response.data.code === 200) {
             this.store('act', response.data.resultData.act, '1800000')
             this.store('ret', response.data.resultData.ret, '1800000')

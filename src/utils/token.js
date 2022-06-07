@@ -5,8 +5,8 @@ Vue.mixin({
   data: () => ({
     AT: {},
     RT: {},
-    level: '',
-    olympic: ''
+    level: {},
+    olympic: {}
   }),
 
   methods: {

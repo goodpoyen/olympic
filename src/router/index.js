@@ -25,9 +25,24 @@ const routes = [
     component: () => import('../views/manageView.vue'),
     children: [
       {
-        path: 'signup',
+        path: 'signup/:id',
         name: 'signup',
         component: () => import('../components/signup.vue')
+      },
+      {
+        path: 'selection',
+        name: 'selection',
+        component: () => import('../components/selection.vue')
+      },
+      {
+        path: 'examArea/:id',
+        name: 'examArea',
+        component: () => import('../components/examArea.vue')
+      },
+      {
+        path: 'classRoom/:id',
+        name: 'classRoom',
+        component: () => import('../components/classRoom.vue')
       },
       {
         path: 'account',

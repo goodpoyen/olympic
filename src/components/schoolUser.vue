@@ -2,11 +2,70 @@
   <div>
     <v-data-table
       :headers="headers"
-      :items="desserts"
-      multi-sort
+      :items="filteredDesserts"
       class="elevation-1"
-      :search="search"
     >
+      <template v-slot:header.statusName="{ header }">
+        {{ header.text }}
+        <v-menu offset-y :close-on-content-click="false">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on">
+              <v-icon small :color="statusName ? 'primary' : ''">
+                mdi-filter
+              </v-icon>
+            </v-btn>
+          </template>
+          <div style="background-color: white; width: 200px; padding: 10px;">
+            <v-select
+              flat
+              small
+              multiple
+              clearable
+              v-model="statusName"
+              label="請選擇"
+              :items="columnValueList(header.value)"
+            >
+            </v-select>
+            <v-btn
+              @click="statusName = ''"
+              small
+              text
+              color="primary"
+              class="ml-2 mb-2"
+              >清除</v-btn
+            >
+          </div>
+        </v-menu>
+      </template>
+      <template v-slot:header.name="{ header }">
+        {{ header.text }}
+        <v-menu offset-y :close-on-content-click="false">
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on">
+              <v-icon small :color="dessertName ? 'primary' : ''">
+                mdi-filter
+              </v-icon>
+            </v-btn>
+          </template>
+          <div style="background-color: white; width: 280px">
+            <v-text-field
+              v-model="dessertName"
+              class="pa-4"
+              type="text"
+              label="輸入搜尋"
+              :autofocus="true"
+            ></v-text-field>
+            <v-btn
+              @click="dessertName = ''"
+              small
+              text
+              color="primary"
+              class="ml-2 mb-2"
+              >清除</v-btn
+            >
+          </div>
+        </v-menu>
+      </template>
       <template v-slot:item.statusName="{ item }">
         <v-chip :color="getColor(item.statusName)" dark>
           {{ item.statusName }}
@@ -37,13 +96,26 @@
                   <v-container>
                     <v-row>
                       <v-col cols="12" sm="6" md="12">
-                        奧林匹亞
-                        <v-select
-                          v-model="editedItem.olympic"
+                        <v-combobox
+                          v-if="level.value === '2'"
+                          :disabled="levelStatus"
+                          v-model="defaultOlympic"
                           :items="olympicItem"
+                          label="奧林匹亞"
+                          multiple
                           :rules="[(v) => !!v || '奧林匹亞不能為空']"
                           required
-                        ></v-select>
+                        ></v-combobox>
+                        <v-combobox
+                          v-else
+                          :disabled="levelStatus"
+                          v-model="editedItem.olympicSelect"
+                          :items="olympicItem"
+                          label="奧林匹亞"
+                          multiple
+                          :rules="[(v) => !!v || '奧林匹亞不能為空']"
+                          required
+                        ></v-combobox>
                       </v-col>
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
@@ -122,7 +194,9 @@
           </v-dialog>
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
-              <v-card-title class="text-h5">確定刪除此帳號資訊？</v-card-title>
+              <v-card-title class="text-h5"
+                >確定刪除此承辦人資訊？</v-card-title
+              >
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDelete"
@@ -142,9 +216,9 @@
         <v-icon small class="mr-2" @click="deleteItem(item)">
           mdi-delete
         </v-icon>
-        <v-icon small class="mr-2" @click="getSchoolUsers()">
+        <!-- <v-icon small class="mr-2" @click="getSchoolUsers()">
           mdi-delete
-        </v-icon>
+        </v-icon> -->
       </template>
     </v-data-table>
   </div>
@@ -153,16 +227,20 @@
 <script>
 export default {
   data: () => ({
+    dessertName: '',
+    statusName: '',
     valid: true,
+    levelStatus: true,
+    defaultOlympic: [],
     search: '',
     dialog: false,
     dialogDelete: false,
     headers: [
-      {
-        text: '奧林匹亞',
-        align: 'start',
-        value: 'olympic'
-      },
+      // {
+      //   text: '奧林匹亞',
+      //   align: 'start',
+      //   value: 'olympic'
+      // },
       { text: '帳號狀態', value: 'statusName' },
       { text: '學校', value: 'school_name' },
       { text: '姓名', value: 'name' },
@@ -172,7 +250,7 @@ export default {
     ],
     emailRules: [
       v => !!v || '帳號(信箱)不能為空',
-      v => /.+@.+/.test(v) || '帳號(信箱)格式不對'
+      v => /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/.test(v) || '帳號(信箱)格式不對'
     ],
     accountStatus: [
       {
@@ -191,6 +269,7 @@ export default {
     editedItem: {
       olympic: '',
       schoolName: '',
+      olympicSelect: '',
       name: '',
       email: '',
       tel: ''
@@ -198,6 +277,7 @@ export default {
     defaultItem: {
       olympic: '',
       schoolName: '',
+      olympicSelect: '',
       name: '',
       email: '',
       tel: ''
@@ -206,7 +286,29 @@ export default {
 
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? '新增承辦人' : '更承辦人資訊'
+      return this.editedIndex === -1 ? '新增承辦人' : '更改承辦人資訊'
+    },
+
+    filteredDesserts () {
+      const conditions = []
+
+      if (this.dessertName) {
+        conditions.push(this.filterDessertName)
+      }
+
+      if (this.statusName) {
+        conditions.push(this.filterStatusName)
+      }
+
+      if (conditions.length > 0) {
+        return this.desserts.filter((dessert) => {
+          return conditions.every((condition) => {
+            return condition(dessert)
+          })
+        })
+      }
+
+      return this.desserts
     }
   },
 
@@ -221,6 +323,10 @@ export default {
 
   methods: {
     editItem (item) {
+      if (this.level.value === '2') {
+        this.defaultOlympic = item.olympic.split(',')
+      }
+
       this.editedIndex = this.desserts.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
@@ -257,6 +363,13 @@ export default {
     save () {
       if (this.editedIndex === -1) {
         this.editedItem.status = '2'
+        if (this.level.value === '2') {
+          this.editedItem.olympic = this.defaultOlympic
+        } else {
+          this.editedItem.olympic = this.editedItem.olympicSelect.toString()
+        }
+      } else {
+        this.editedItem.olympic = this.editedItem.olympicSelect.toString()
       }
 
       this.editedItem = this.changeData(this.editedItem)
@@ -268,6 +381,18 @@ export default {
       }
 
       this.close()
+    },
+
+    filterDessertName (item) {
+      return item.name.toLowerCase().includes(this.dessertName.toLowerCase())
+    },
+
+    filterStatusName (item) {
+      return item.statusName.includes(this.statusName)
+    },
+
+    columnValueList (val) {
+      return this.desserts.map(d => d[val])
     },
 
     changeData (data) {
@@ -299,6 +424,8 @@ export default {
             const that = this
             this.desserts.forEach(function (data) {
               data = that.changeData(data)
+
+              data.olympicSelect = data.olympic.split(',')
             })
             console.log(this.desserts)
           } else if (response.data.code === 400) {
@@ -322,6 +449,12 @@ export default {
 
   async mounted () {
     // console.log(this.level.value)
+    if (this.level.value === '1') {
+      this.levelStatus = false
+    } else {
+      this.defaultOlympic.push(this.olympic.value)
+    }
+
     await this.renewLT()
     await this.getSchoolUsers()
   }

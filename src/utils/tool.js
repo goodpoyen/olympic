@@ -35,6 +35,44 @@ Vue.mixin({
       return this.year + '-' + this.month + '-' + this.day + ' ' + this.hours + ':' + this.minutes + ':' + this.seconds
     },
 
+    getDataTimeFormat (date) {
+      // const today = new Date()
+
+      this.year = date.getFullYear()
+
+      this.month = date.getMonth() + 1
+
+      if (this.month < 10) {
+        this.month = '0' + this.month
+      }
+
+      this.day = date.getDay()
+
+      if (this.day < 10) {
+        this.day = '0' + this.day
+      }
+
+      this.hours = date.getHours()
+
+      if (this.hours < 10) {
+        this.hours = '0' + this.hours
+      }
+
+      this.minutes = date.getMinutes()
+
+      if (this.minutes < 10) {
+        this.minutes = '0' + this.minutes
+      }
+
+      this.seconds = date.getSeconds()
+
+      if (this.seconds < 10) {
+        this.seconds = '0' + this.seconds
+      }
+
+      return this.year + '/' + this.month + '/' + this.day + ' ' + this.hours + ':' + this.minutes + ':' + this.seconds
+    },
+
     changeOlympicData (word) {
       if (word === 'TMO') {
         return '數學奧林匹亞  (TMO)'
