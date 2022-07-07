@@ -1,5 +1,24 @@
 <template>
   <div>
+    <v-overlay :value="overlay" absolute>
+      <v-btn icon color="red" :style="{ left: '83%', top:'40px' }" @click="overlay = false">
+        <v-icon large>mdi-close-circle-outline</v-icon>
+      </v-btn>
+      <v-card-title class="text-h6" :style="{ margin: 'auto', width: width }">
+        <v-btn color="orange lighten-2" @click="dessertName = '陳大天'">
+          Hide Overlay
+        </v-btn>
+      </v-card-title>
+      <v-carousel
+        hide-delimiters
+        height="auto"
+        :style="{ margin: 'auto', width: width }"
+      >
+        <v-carousel-item v-for="(item, i) in item2" :key="i">
+          <v-img :src="item.src"></v-img>
+        </v-carousel-item>
+      </v-carousel>
+    </v-overlay>
     <v-data-table
       :headers="headers"
       :items="filteredDesserts"
@@ -15,7 +34,7 @@
               </v-icon>
             </v-btn>
           </template>
-          <div style="background-color: white; width: 200px; padding: 10px;">
+          <div style="background-color: white; width: 200px; padding: 10px">
             <v-select
               flat
               small
@@ -216,9 +235,7 @@
         <v-icon small class="mr-2" @click="deleteItem(item)">
           mdi-delete
         </v-icon>
-        <!-- <v-icon small class="mr-2" @click="getSchoolUsers()">
-          mdi-delete
-        </v-icon> -->
+        <v-icon small class="mr-2" @click="show()"> mdi-delete </v-icon>
       </template>
     </v-data-table>
   </div>
@@ -227,6 +244,29 @@
 <script>
 export default {
   data: () => ({
+    // width: '50%',
+    overlay: false,
+    items: [
+      {
+        src: 'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg'
+      },
+      {
+        src: 'https://cdn.vuetifyjs.com/images/carousel/sky.jpg'
+      },
+      {
+        src: 'https://scontent-tpe1-1.xx.fbcdn.net/v/t39.30808-6/283755359_5412721285416863_8270869590315033899_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=8bfeb9&_nc_ohc=l6A5-SmWqcYAX9SntHB&_nc_ht=scontent-tpe1-1.xx&oh=00_AT_fPbSDY7ZvF_ELIIdUDVB1XrsFpsCUwMj8HPy1npTe7A&oe=62A7857F'
+      },
+      {
+        src: 'https://cdn.vuetifyjs.com/images/carousel/planet.jpg'
+      },
+      {
+        src: 'https://hujiyi.gitee.io/2021/01/20/create-a-vue-app-based-vuetify-and-leancloud-part-II/filelist.png'
+      },
+      {
+        src: 'https://media.istockphoto.com/photos/taipei-city-panorama-in-taiwan-picture-id1209191587'
+      }
+    ],
+    item2: [],
     dessertName: '',
     statusName: '',
     valid: true,
@@ -309,7 +349,18 @@ export default {
       }
 
       return this.desserts
+    },
+
+    width () {
+      console.log(document.documentElement.clientWidth)
+
+      if (document.documentElement.clientWidth >= 1600) {
+        return '70%'
+      } else {
+        return '50%'
+      }
     }
+
   },
 
   watch: {
@@ -322,6 +373,11 @@ export default {
   },
 
   methods: {
+    show () {
+      this.overlay = true
+      this.drawer = false
+      console.log(this.drawer)
+    },
     editItem (item) {
       if (this.level.value === '2') {
         this.defaultOlympic = item.olympic.split(',')
@@ -444,6 +500,24 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
+    },
+
+    test (key) {
+      // console.log(key)
+      const i = key
+
+      this.item2 = this.items.slice(i, this.items.length)
+      this.item2 = this.item2.concat(this.items.slice(0, key))
+      // for (i; i < this.items.length; i++) {
+      //   this.item2.push(this.items[i])
+      // }
+
+      // for (let j = 0; j < key; j++) {
+      //   console.log(j)
+      //   this.item2.push(this.items[j])
+      // }
+      // console.log(this.items)
+      // console.log(this.item2)
     }
   },
 
@@ -457,6 +531,9 @@ export default {
 
     await this.renewLT()
     await this.getSchoolUsers()
+    // this.items.splice(1, 1)
+    this.test(0)
+    // console.log(this.drawer)
   }
 }
 </script>

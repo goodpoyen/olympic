@@ -40,9 +40,9 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar dense>
+    <v-app-bar dark color="#0046FE" dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>選拔支援系統</v-toolbar-title>
+      <v-toolbar-title>{{ currentRouteName }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="logout">
         <v-icon>mdi-export</v-icon>
@@ -55,9 +55,10 @@
 <script>
 export default {
   data: () => ({
-    drawer: null,
+    // drawer: null,
     olympicTitle: '',
     olympicMsg: '',
+    // currentRouteName: '',
     items: [
       {
         action: 'mdi-cog',
@@ -78,6 +79,22 @@ export default {
     ],
     datetime: new Date()
   }),
+
+  computed: {
+    currentRouteName () {
+      let title
+
+      if (this.$route.name === 'account') {
+        title = '帳號管理'
+      }
+
+      if (this.$route.name === 'schoolUser') {
+        title = '承辦人資料管理'
+      }
+
+      return title
+    }
+  },
 
   methods: {
     route (path, param) {

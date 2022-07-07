@@ -353,7 +353,7 @@ export default {
 
       this.desserts = [
         { olyId: '3', slectionId: 'A', olympic: 'TOI', signupName: '2022台灣資訊奧林匹亞初選選拔賽', startTime: '2022/04/01 00:00:00', endTime: '2022/04/14 23:59:00', type: '1', time: '2022/04/01 00:00:00 ~ 2022/04/14 23:59:00' },
-        { olyId: '4', slectionId: 'B', olympic: 'TOI', signupName: '2022台灣資訊奧林匹亞初選選拔賽', startTime: '2019/04/01 00:00:00', endTime: '2022/04/14 23:59:00', type: '2', time: '2022/04/01 00:00:00 ~ 2022/04/14 23:59:00' }
+        { olyId: '4', slectionId: 'B', olympic: 'TOI', signupName: '2022台灣資訊奧林匹亞初選選拔賽', startTime: '2022/04/01 00:00:00', endTime: '2022/04/14 23:59:00', type: '2', time: '2022/04/01 00:00:00 ~ 2022/04/14 23:59:00' }
       ]
 
       const that = this

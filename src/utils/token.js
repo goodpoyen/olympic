@@ -6,7 +6,8 @@ Vue.mixin({
     AT: {},
     RT: {},
     level: {},
-    olympic: {}
+    olympic: {},
+    drawer: false
   }),
 
   methods: {
@@ -135,6 +136,9 @@ Vue.mixin({
         })
 
       return status
+    },
+    po () {
+
     }
   },
 
@@ -143,5 +147,7 @@ Vue.mixin({
     this.olympic = JSON.parse(localStorage.getItem('olympic'))
     this.AT = JSON.parse(localStorage.getItem('act'))
     this.RT = JSON.parse(localStorage.getItem('ret'))
+
+    this.drawer = true
   }
 })
