@@ -139,6 +139,8 @@ export default {
     this.olympicTitle = await this.changeOlympicData(this.olympic.value)
     this.olympicMsg = await this.changeOlympicMsg(this.level.value)
     await this.renewLT()
+    this.$store.dispatch('test', 'balabala')
+    console.log(this.$store.state.test)
   }
 }
 </script>

@@ -419,6 +419,7 @@ export default {
     // console.log(this.level.value)
     await this.renewLT()
     await this.getAccountList()
+    console.log(this.$store.state.test)
   }
 }
 </script>
