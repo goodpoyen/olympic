@@ -1,17 +1,24 @@
 <template>
   <v-main
     :style="{
-      'background-image': 'url(/images/test.jpg)',
-      'background-size': 'cover',
+      'background-image': 'url(/images/loginBackground.png)',
+      'background-size': '100% 100%',
       'background-repeat': 'no-repeat',
       height: '100%',
     }"
   >
-    <v-card width="50%" class="mx-auto my-12">
+    <div style="width: 30%; margin: 40px auto">
+      <span
+        style="
+          display: flex;
+          justify-content: center;
+          font-size: 18px;
+          font-weight: bold;
+          color: #3041d6;
+        "
+        >奧林匹亞選訓支援系統</span
+      >
       <validation-observer ref="observer" v-slot="{ invalid }">
-        <div class="teal lighten-4 darken-2 text-center">
-          <span class="white--text">登入</span>
-        </div>
         <form style="padding: 20px">
           <validation-provider
             v-slot="{ errors }"
@@ -23,6 +30,7 @@
               :error-messages="errors"
               label="帳號"
               @keyup.enter="login"
+              prepend-icon="mdi-account-circle-outline"
               required
             ></v-text-field>
           </validation-provider>
@@ -30,8 +38,11 @@
             <v-text-field
               v-model="password"
               :error-messages="errors"
+              :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+              @click:append="show1 = !show1"
               label="密碼"
-              :type="'password'"
+              :type="show1 ? 'text' : 'password'"
+              prepend-icon="mdi-key"
               required
               @keyup.enter="login"
             ></v-text-field>
@@ -48,6 +59,7 @@
               label="驗證碼"
               :type="'verifycode'"
               @keyup.enter="login"
+              prepend-icon="mdi-lastpass"
               required
             ></v-text-field>
             <s-identify
@@ -68,7 +80,13 @@
             {{ errorMsg }}
           </v-alert>
 
-          <v-btn block class="green mr-4" :disabled="invalid" @click="login()"
+          <v-btn
+            block
+            depressed
+            class="mr-4 white--text"
+            color="#2D5BFF"
+            :disabled="invalid"
+            @click="login()"
             >登入</v-btn
           >
           <v-alert
@@ -82,9 +100,20 @@
             {{ dialogMsg }}
           </v-alert>
         </form>
-        <!-- <a href="/forget" target="_blank" style="padding: 20px">? 忘記密碼</a> -->
       </validation-observer>
-    </v-card>
+    </div>
+    <div
+      class="py-8 white--text text-center"
+      style="
+        font-size: 5px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+      "
+    >
+      @ {{ new Date().getFullYear() }} ALL Rights Reserved.
+    </div>
   </v-main>
 </template>
 
@@ -125,7 +154,8 @@ export default {
     alertShow: false,
     errorMsg: '',
     dialogMsg: '',
-    dialog: false
+    dialog: false,
+    show1: false
   }),
 
   watch: {
@@ -157,6 +187,9 @@ export default {
       // console.log(this.$store.dispatch('test', 'balabala'))
       // console.log(this.$store.state.test)
       return this.$store.state.test
+    },
+    id () {
+      return this.$route.params.id
     }
   },
 
@@ -184,6 +217,7 @@ export default {
         .post(this.GLOBAL.APISERVERURL + '/login', user)
         .then((response) => {
           if (response.data.code === 200) {
+            console.log(response.data)
             this.store('act', response.data.resultData.act, '1800000')
             this.store('ret', response.data.resultData.ret, '1800000')
             this.store('level', response.data.resultData.level, '1800000')
@@ -223,7 +257,8 @@ export default {
   mounted () {
     this.identifyCode = ''
     this.makeCode(this.identifyCodes, 4)
-    console.log(this.test8)
+    // console.log(this.test8)
+    console.log(this.id)
     // console.log(4)
   }
 }

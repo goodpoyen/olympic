@@ -333,9 +333,9 @@ export default {
     },
 
     getColor (status) {
-      if (status === '停權') return 'red'
-      else if (status === '認證') return 'orange'
-      else return 'green'
+      if (status === '停權') return 'blue'
+      else if (status === '認證') return 'blue'
+      else return 'blue'
     },
 
     async getAccountList () {
