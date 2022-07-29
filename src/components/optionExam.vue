@@ -14,7 +14,9 @@
           <v-container v-if="n == 2" fluid>
             <exam-area></exam-area>
           </v-container>
-          <v-container v-if="n == 3" fluid>6666 </v-container>
+          <v-container v-if="n == 3" fluid>
+            <class-room></class-room>
+          </v-container>
           <v-container v-if="n == 4" fluid>7777 </v-container>
         </v-tab-item>
       </v-tabs>
@@ -25,6 +27,7 @@
 <script>
 import PersonnelInfo from './personnelInfo.vue'
 import ExamArea from './examArea.vue'
+import ClassRoom from './classRoom.vue'
 export default {
   data: () => ({
 
@@ -32,7 +35,8 @@ export default {
 
   components: {
     PersonnelInfo,
-    ExamArea
+    ExamArea,
+    ClassRoom
   },
 
   computed: {

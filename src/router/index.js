@@ -57,6 +57,7 @@ const routes = [
       {
         path: 'classRoom/:id',
         name: 'classRoom',
+        props: true,
         component: () => import('../components/classRoom.vue')
       },
       {

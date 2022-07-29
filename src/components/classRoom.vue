@@ -5,22 +5,69 @@
       :items="desserts"
       multi-sort
       class="elevation-1"
-      :search="search"
     >
+      <template
+        v-for="(header, index) in headers"
+        v-slot:[`header.${header.value}`]="{ header }"
+      >
+        <thead>
+          <tr>
+            <th>
+              <span>{{ header.text }}</span>
+            </th>
+
+            <th v-if="header.text != '功能'">
+              <v-menu offset-y :close-on-content-click="false">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn icon v-bind="attrs" v-on="on">
+                    <v-icon :id="'color' + index" small color="">
+                      mdi-filter
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <div style="background-color: white; width: 280px">
+                  <v-text-field
+                    @keyup="filteredDesserts(index, header.filterName)"
+                    :id="'input' + index"
+                    class="pa-4"
+                    type="text"
+                    label="輸入搜尋"
+                    :autofocus="true"
+                  ></v-text-field>
+                  <v-btn
+                    :id="'clean' + index"
+                    @click="cleanDesserts(index, header.filterName)"
+                    small
+                    text
+                    color="primary"
+                    class="ml-2 mb-2"
+                    >清除</v-btn
+                  >
+                </div>
+              </v-menu>
+            </th>
+          </tr>
+        </thead>
+      </template>
+      <template v-slot:item.statusName="{ item }">
+        <v-chip :color="getColor(item.statusName)" dark>
+          {{ item.statusName }}
+        </v-chip>
+      </template>
       <template v-slot:top>
         <v-toolbar flat>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-          <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                新增教室
+              <v-btn
+                small
+                color="#635BFF"
+                dark
+                class="mb-2"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon small left> mdi-map-marker-radius-outline </v-icon>
+                <p style="font-size: 13px; margin-top: 16px">新增考場</p>
               </v-btn>
             </template>
             <v-card>
@@ -49,49 +96,67 @@
                           :items="olympicItem"
                           label="奧林匹亞"
                           multiple
-                          :rules="[(v) => !!v || '奧林匹亞碼不能為空']"
+                          :rules="[(v) => !!v || '奧林匹亞不能為空']"
                           required
                         ></v-combobox>
                       </v-col>
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
-                          v-model="editedItem.className"
-                          label="教室名稱"
-                          :rules="[(v) => !!v || '教室名稱不能為空']"
+                          v-model="editedItem.school_name"
+                          label="學校"
+                          :rules="[(v) => !!v || '學校不能為空']"
                           required
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
-                          v-model="editedItem.classId"
-                          label="教室代碼"
-                          :rules="[(v) => !!v || '教室代碼不能為空']"
+                          v-model="editedItem.name"
+                          label="姓名"
+                          :rules="[(v) => !!v || '姓名不能為空']"
                           required
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
-                          v-model="editedItem.seatNumber"
-                          label="座位數"
-                          :rules="[(v) => !!v || '座位數不能為空']"
+                          v-model="editedItem.email"
+                          label="信箱"
+                          :rules="emailRules"
                           required
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12" sm="6" md="6">
                         <v-text-field
-                          v-model="editedItem.row"
-                          label="橫排數"
-                          :rules="[(v) => !!v || '橫排數不能為空']"
+                          v-model="editedItem.tel"
+                          label="公務電話"
+                          :rules="[(v) => !!v || '姓名不能為空']"
                           required
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" sm="6" md="6">
-                        <v-text-field
-                          v-model="editedItem.column"
-                          label="直排數"
-                          :rules="[(v) => !!v || '直排數不能為空']"
+                      <v-col cols="12" sm="6" md="4">
+                        <v-radio-group
+                          v-if="editedIndex === -1"
+                          v-model="defaultStatus"
+                          :disabled="true"
+                          :rules="[(v) => !!v || 'Item is required']"
                           required
-                        ></v-text-field>
+                        >
+                          承辦人狀態
+                          <v-radio
+                            v-for="status in accountStatus"
+                            :key="status.key"
+                            :label="status.key"
+                            :value="status.value"
+                          ></v-radio>
+                        </v-radio-group>
+                        <v-radio-group v-else v-model="editedItem.status">
+                          承辦人狀態
+                          <v-radio
+                            v-for="status in accountStatus"
+                            :key="status.key"
+                            :label="status.key"
+                            :value="status.value"
+                          ></v-radio>
+                        </v-radio-group>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -112,7 +177,9 @@
           </v-dialog>
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
-              <v-card-title class="text-h5">確定刪除此教室資訊？</v-card-title>
+              <v-card-title class="text-h5"
+                >確定刪除此承辦人資訊？</v-card-title
+              >
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="closeDelete"
@@ -128,25 +195,15 @@
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-        <v-icon small class="mr-2" @click="deleteItem(item)">
-          mdi-delete
-        </v-icon>
-        <v-icon small class="mr-2" @click="deleteItem(item)">
+        <v-icon class="mr-2" @click="editItem(item)">
           mdi-download-box-outline
         </v-icon>
-        <!-- <v-icon small class="mr-2" @click="getSchoolUsers()">
-          mdi-delete
-        </v-icon> -->
-      </template>
-      <template v-slot:item.setting="{ item }">
-        <v-btn
-          depressed
-          color="primary"
-          style="display: block; margin-top: 10px"
-          @click="route('classRoom', item.olyId)"
-          >教室設定
-        </v-btn>
+        <v-icon class="mr-2" @click="editItem(item)">
+          mdi-text-box-edit-outline
+        </v-icon>
+        <v-icon class="mr-2" @click="deleteItem(item)">
+          mdi-trash-can-outline
+        </v-icon>
       </template>
     </v-data-table>
   </div>
@@ -155,69 +212,69 @@
 <script>
 export default {
   data: () => ({
-    ne: '1',
+    keyWord: '',
+    keyClumn: '',
+    dessertChineseName: '',
+    key: 0,
+    statusName: '',
     valid: true,
     levelStatus: true,
     defaultOlympic: [],
-    olympicItem: ['TMO', 'IPHO', 'TWICHO', 'CTBO', 'IESO', 'TWIJSO', 'TOI'],
-    search: '',
     dialog: false,
     dialogDelete: false,
     headers: [
-      { text: '教室代碼', value: 'classId' },
-      {
-        text: '教室名稱',
-        align: 'start',
-        value: 'className'
-      },
-      { text: '座位數', value: 'seatNumber' },
-      { text: '橫排', value: 'row' },
-      { text: '直排', value: 'column' },
-      { text: '功能', value: 'actions', sortable: false }
+      { text: '考場代碼', value: 'codeName', filterName: 'codeName' },
+      { text: '考區名稱', value: 'areaName', filterName: 'areaName' },
+      { text: '考場名稱', value: 'roomName', filterName: 'roomName' },
+      { text: '總座數', value: 'totalSeat', filterName: 'totalSeat' },
+      { text: '行排', value: 'rowNumber', filterName: 'rowNumber' },
+      { text: '直排', value: 'columnNumber', filterName: 'columnNumber' },
+      { text: '功能', value: 'actions' }
     ],
-    desserts: [
-      // { slectionID: 'A', olympic: 'TOI', signupName: '2022台灣資訊奧林匹亞初選選拔賽', startTime: '2022/04/01 00:00', endTime: '2022/04/14 23:59', type: '1', time: '2022/04/01 00:00 ~ 2022/04/14 23:59' },
-      // { slectionID: 'B', olympic: 'TOI', signupName: '2022台灣資訊奧林匹亞初選選拔賽', startTime: '2022/04/01 00:00', endTime: '2022/04/14 23:59', type: '2', time: '2022/04/01 00:00 ~ 2022/04/14 23:59' }
+    emailRules: [
+      v => !!v || '帳號(信箱)不能為空',
+      v => /^\w+((-\w+)|(\.\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/.test(v) || '帳號(信箱)格式不對'
     ],
-    editedIndex: -1,
-    editedItem: {
-      slectionId: '',
-      olympic: '',
-      olympicSelect: '',
-      typeName: '',
-      signupName: '',
-      startTime: '',
-      endTime: '',
-      time: '',
-      type: ''
-    },
-    defaultItem: {
-      slectionId: '',
-      olympic: '',
-      olympicSelect: '',
-      typeName: '',
-      signupName: '',
-      startTime: '',
-      endTime: '',
-      time: '',
-      type: ''
-    },
-
-    testType: [
+    accountStatus: [
       {
-        key: '考試',
+        key: '啟用',
         value: '1'
       },
       {
-        key: '選拔營',
+        key: '停權',
         value: '2'
       }
-    ]
+    ],
+    defaultStatus: '2',
+    olympicItem: ['TMO', 'IPHO', 'TWICHO', 'CTBO', 'IESO', 'TWIJSO', 'TOI'],
+    desserts: [],
+    dessertsTemp: [],
+    editedIndex: -1,
+    editedItem: {
+      olympic: '',
+      schoolName: '',
+      olympicSelect: '',
+      name: '',
+      email: '',
+      tel: ''
+    },
+    defaultItem: {
+      olympic: '',
+      schoolName: '',
+      olympicSelect: '',
+      name: '',
+      email: '',
+      tel: ''
+    }
   }),
 
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? '新增教室' : '更改教室'
+      return this.editedIndex === -1 ? '新增承辦人' : '更改承辦人資訊'
+    },
+
+    id () {
+      return this.$route.params.id
     }
   },
 
@@ -231,18 +288,51 @@ export default {
   },
 
   methods: {
+    filteredDesserts (index, filterName) {
+      const value = document.getElementById('input' + index).value
+
+      document.getElementById('color' + index).style.color = 'rgb(25 118 210)'
+
+      if (document.getElementById('input' + index).value != null) {
+        this.desserts = this.dessertsTemp.filter((dessert) => {
+          return dessert[filterName].toLowerCase().includes(value.toLowerCase())
+        })
+      }
+
+      return this.desserts
+    },
+
+    cleanDesserts (index, filterName) {
+      document.getElementById('input' + index).value = ''
+
+      document.getElementById('color' + index).style.color = ''
+
+      this.desserts = this.dessertsTemp.filter((dessert) => {
+        if (dessert[filterName] === '' || dessert[filterName] == null) {
+          return dessert
+        } else {
+          return !dessert[filterName].toLowerCase().includes(null)
+        }
+      })
+
+      return this.desserts
+    },
+
+    show () {
+      this.overlay = true
+      this.drawer = false
+    },
+    reloadTitle () {
+      this.titleName = this.$store.dispatch('title', '選拔管理')
+      return this.$store.state.title
+    },
+
     editItem (item) {
-      // if (this.level.value === '2') {
-      //   this.defaultOlympic = item.olympic.split(',')
-      // }
-      // console.log(item)
-      // console.log(this.editedIndex)
+      if (this.level.value === '2') {
+        this.defaultOlympic = item.olympic.split(',')
+      }
 
       this.editedIndex = this.desserts.indexOf(item)
-      if (this.editedIndex !== -1) {
-        item.startTime = new Date(item.startTime)
-        item.endTime = new Date(item.endTime)
-      }
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
@@ -276,22 +366,18 @@ export default {
     },
 
     save () {
-      console.log(this.editedItem)
-      this.editedItem = this.changeData(this.editedItem)
-      this.editedItem.olympic = this.defaultOlympic
-      this.editedItem.time = this.getDataTimeFormat(this.editedItem.startTime) + ' ~ ' + this.getDataTimeFormat(this.editedItem.endTime)
       if (this.editedIndex === -1) {
-        // this.editedItem.status = '2'
-        // if (this.level.value === '2') {
-        //   this.editedItem.olympic = this.defaultOlympic
-        // } else {
-        //   this.editedItem.olympic = this.editedItem.olympicSelect.toString()
-        // }
+        this.editedItem.status = '2'
+        if (this.level.value === '2') {
+          this.editedItem.olympic = this.defaultOlympic
+        } else {
+          this.editedItem.olympic = this.editedItem.olympicSelect.toString()
+        }
       } else {
-        // this.editedItem.olympic = this.editedItem.olympicSelect.toString()
+        this.editedItem.olympic = this.editedItem.olympicSelect.toString()
       }
 
-      // this.editedItem = this.changeData(this.editedItem)
+      this.editedItem = this.changeData(this.editedItem)
 
       if (this.editedIndex > -1) {
         Object.assign(this.desserts[this.editedIndex], this.editedItem)
@@ -302,76 +388,67 @@ export default {
       this.close()
     },
 
+    columnValueList (val) {
+      return this.desserts.map(d => d[val])
+    },
+
     changeData (data) {
-      if (data.type === '1') {
-        data.typeName = '考試'
+      if (data.status === '1') {
+        data.statusName = '啟用'
       }
-      if (data.type === '2') {
-        data.typeName = '選拔營'
+      if (data.status === '2') {
+        data.statusName = '停權'
       }
 
       return data
     },
 
-    async getSelections () {
+    getColor (status) {
+      if (status === '停權') return 'red'
+      else if (status === '認證') return 'orange'
+      else return 'blue'
+    },
+
+    async getClassRoomInfo () {
       const data = {}
       data.AT = this.AT.value
+      data.id = this.id
 
-      this.desserts = [
-        { olyId: '3', classId: 'A', className: 'B1O1', seatNumber: '45', row: '5', column: '9' },
-        { olyId: '4', classId: 'B', className: 'B1O1', seatNumber: '45', row: '5', column: '9' }
-      ]
+      await this.axios
+        .post(this.GLOBAL.APISERVERURL + '/getClassRoom', data)
+        .then((response) => {
+          console.log(response.data)
+          if (response.data.code === 200) {
+            this.desserts = response.data.resultData
+            this.dessertsTemp = response.data.resultData
+            // const that = this
+            // this.desserts.forEach(function (data) {
+            //   data = that.changeData(data)
 
-      const that = this
-      this.defaultOlympic = ['TOI']
-      this.desserts.forEach(function (data) {
-        data = that.changeData(data)
-        data.olympicSelect = data.olympic.split(',')
-      })
-      console.log(this.desserts)
-      // await this.axios
-      //   .post(this.GLOBAL.APISERVERURL + '/getSchoolUsers', data)
-      //   .then((response) => {
-      //     if (response.data.code === 200) {
-      //       this.desserts = response.data.resultData
-      //       const that = this
-      //       this.desserts.forEach(function (data) {
-      //         data = that.changeData(data)
-
-      //         data.olympicSelect = data.olympic.split(',')
-      //       })
-      //       console.log(this.desserts)
-      //     } else if (response.data.code === 400) {
-      //       if (this.getAT()) {
-      //         const that = this
-      //         setTimeout(function () {
-      //           that.getSchoolUsers()
-      //         }, 1000)
-      //       } else {
-      //         location.href = '/login'
-      //       }
-      //     } else if (response.data.code === 401) {
-      //       location.reload()
-      //     }
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error)
-      //   })
-    },
-    route (path, param) {
-      console.log(path)
-      console.log(param)
-      if (path === 'classRoom') {
-        this.$router.push({ path: '/manage/classRoom/' + param })
-        // console.log(this.$router.path)
-        // window.history.pushState('page2', 'Title', '/manage/account');
-      }
+            //   data.olympicSelect = data.olympic.split(',')
+            // })
+            // console.log(this.desserts)
+          } else if (response.data.code === 400) {
+            if (this.getAT()) {
+              const that = this
+              setTimeout(function () {
+                that.getClassRoomInfo()
+              }, 1000)
+            } else {
+              location.href = '/login'
+            }
+          } else if (response.data.code === 401) {
+            location.reload()
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   },
 
   async mounted () {
-    // console.log(this.level.value)
-    // console.log(new Date('2022/04/14 23:59'))
+    this.reloadTitle()
     if (this.level.value === '1') {
       this.levelStatus = false
     } else {
@@ -379,7 +456,7 @@ export default {
     }
 
     await this.renewLT()
-    await this.getSelections()
+    await this.getClassRoomInfo()
   }
 }
 </script>
