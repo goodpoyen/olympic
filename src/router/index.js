@@ -37,6 +37,12 @@ const routes = [
         component: () => import('../components/selection.vue')
       },
       {
+        path: 'optionExam/:id',
+        name: 'optionExam',
+        props: true,
+        component: () => import('../components/optionExam.vue')
+      },
+      {
         path: 'personnelInfo/:id',
         name: 'personnelInfo',
         props: true,
@@ -45,6 +51,7 @@ const routes = [
       {
         path: 'examArea/:id',
         name: 'examArea',
+        props: true,
         component: () => import('../components/examArea.vue')
       },
       {

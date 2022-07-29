@@ -34,7 +34,7 @@
         <thead>
           <tr>
             <th>
-              <span style="font-size: 13.5px; ">{{ header.text }}</span>
+              <span >{{ header.text }}</span>
             </th>
 
             <th v-if="header.text != '功能'">
@@ -373,8 +373,8 @@ export default {
       this.overlay = true
       this.drawer = false
     },
-    reload () {
-      this.titleName = this.$store.dispatch('title', '選拔管理9')
+    reloadTitle () {
+      this.titleName = this.$store.dispatch('title', '選拔管理')
       return this.$store.state.title
     },
 
@@ -499,7 +499,7 @@ export default {
   },
 
   async mounted () {
-    this.reload()
+    this.reloadTitle()
     if (this.level.value === '1') {
       this.levelStatus = false
     } else {
