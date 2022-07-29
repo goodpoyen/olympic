@@ -1,48 +1,60 @@
 <template>
   <div>
     <v-navigation-drawer v-model="drawer" app>
-      <v-list>
+      <v-list style="margin: -18px">
         <v-list-item link>
           <v-list-item-content>
-            <v-list-item-title class="text-h6">
-              {{ olympicTitle }}
-            </v-list-item-title>
-            <v-list-item-subtitle>{{ olympicMsg }}</v-list-item-subtitle>
+            <v-list-item style="right: 2px">
+              <v-list-item-avatar>
+                <v-img
+                  max-height="30"
+                  max-width="30"
+                  src="/images/logo.png"
+                ></v-img>
+              </v-list-item-avatar>
+              <v-list-item-title
+                class="text-h7"
+                style="right: 9px; font-weight: bold; color: #0046fe"
+              >
+                {{ olympicTitle }}
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item style="left: 52px; margin-top: -22px">
+              <v-list-item-subtitle>{{ olympicMsg }}</v-list-item-subtitle>
+            </v-list-item>
           </v-list-item-content>
         </v-list-item>
       </v-list>
-
       <v-divider></v-divider>
-
-      <v-list>
-        <v-list-group
-          v-for="item in items"
-          :key="item.title"
-          v-model="item.active"
-          :prepend-icon="item.action"
-          no-action
-        >
-          <template v-slot:activator>
-            <v-list-item-content>
-              <v-list-item-title v-text="item.title"></v-list-item-title>
-            </v-list-item-content>
-          </template>
-
-          <v-list-item v-for="child in item.items" :key="child.title" link>
-            <v-list-item-content>
-              <v-list-item-title
-                v-text="child.title"
-                @click="route(child.even, child.param)"
-              ></v-list-item-title>
+      <v-list dense style="margin-top: 10px">
+        <v-list-item-group v-model="selectedItem" color="primary">
+          <v-list-item v-for="(item, i) in items" :key="i">
+            <v-list-item-icon style="margin-top: 15px">
+              <v-icon v-text="item.icon"></v-icon>
+            </v-list-item-icon>
+            <v-list-item-content style="margin-top: 9px">
+              <router-link
+                :to="'/manage/' + item.even"
+                style="
+                  font-size: 13px;
+                  font-weight: bold;
+                  text-decoration: none;
+                  color: black;
+                "
+              >
+                {{ item.text }}
+              </router-link>
             </v-list-item-content>
           </v-list-item>
-        </v-list-group>
+        </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
 
     <v-app-bar dark color="#0046FE" dense>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>{{ currentRouteName }}</v-toolbar-title>
+      <v-toolbar-title style="font-size: 17px; font-weight: bold">
+        {{titleName}}
+      </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="logout">
         <v-icon>mdi-export</v-icon>
@@ -55,44 +67,24 @@
 <script>
 export default {
   data: () => ({
-    // drawer: null,
     olympicTitle: '',
     olympicMsg: '',
-    // currentRouteName: '',
+    selectedItem: 0,
     items: [
-      {
-        action: 'mdi-cog',
-        items: [
-          { title: '帳號管理', even: 'account' },
-          { title: '學校承辦人管理', even: 'schoolUser' }
-        ],
-        title: '管理項目'
-      },
-      {
-        action: 'mdi-file-document-edit-outline',
-        active: true,
-        items: [
-          { title: '選拔管理', even: 'selection', param: '1' }
-        ],
-        title: '選拔項目'
-      }
+      { text: '選拔管理', icon: 'mdi-calendar-text-outline', even: 'selection' },
+      { text: '聯絡人管理', icon: 'mdi-briefcase-account-outline', even: 'schoolUser' },
+      { text: '樣板上傳', icon: 'mdi-file-upload-outline' },
+      { text: '系統管理', icon: 'mdi-cog-outline' }
     ],
     datetime: new Date()
   }),
 
   computed: {
-    currentRouteName () {
-      let title
-
-      if (this.$route.name === 'account') {
-        title = '帳號管理'
+    titleName () {
+      if (this.$route.path === '/manage') {
+        this.$store.dispatch('title', '選拔管理')
       }
-
-      if (this.$route.name === 'schoolUser') {
-        title = '承辦人資料管理'
-      }
-
-      return title
+      return this.$store.state.title
     }
   },
 
@@ -139,8 +131,6 @@ export default {
     this.olympicTitle = await this.changeOlympicData(this.olympic.value)
     this.olympicMsg = await this.changeOlympicMsg(this.level.value)
     await this.renewLT()
-    // this.$store.dispatch('test', 'balabala')
-    // console.log(this.$store.state.test)
   }
 }
 </script>

@@ -1,89 +1,74 @@
 <template>
   <div>
-    <v-overlay :value="overlay" absolute>
-      <v-btn icon color="red" :style="{ left: '83%', top:'40px' }" @click="overlay = false">
-        <v-icon large>mdi-close-circle-outline</v-icon>
-      </v-btn>
-      <v-card-title class="text-h6" :style="{ margin: 'auto', width: width }">
-        <v-btn color="orange lighten-2" @click="dessertName = '陳大天'">
-          Hide Overlay
-        </v-btn>
-      </v-card-title>
-      <v-carousel
-        hide-delimiters
-        height="auto"
-        :style="{ margin: 'auto', width: width }"
+    <div style="margin: 20px; font-size: 14px; font-weight: bold">
+      選拔模組:
+      <v-btn
+        x-small
+        rounded
+        color="#E9F8FF"
+        style="margin-left: 11px; margin-top: -2px"
       >
-        <v-carousel-item v-for="(item, i) in item2" :key="i">
-          <v-img :src="item.src"></v-img>
-        </v-carousel-item>
-      </v-carousel>
-    </v-overlay>
+        <v-icon small left> mdi-note-check-outline </v-icon>測驗
+      </v-btn>
+      <div style="display: inline; margin: 52px">
+        選拔名稱:
+        <div
+          class="text-decoration-underline single-line"
+          style="display: inline; margin: 13px"
+        >
+          海選階段
+        </div>
+      </div>
+    </div>
+
     <v-data-table
       :headers="headers"
-      :items="filteredDesserts"
+      :items="desserts"
+      multi-sort
       class="elevation-1"
     >
-      <template v-slot:header.statusName="{ header }">
-        {{ header.text }}
-        <v-menu offset-y :close-on-content-click="false">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-bind="attrs" v-on="on">
-              <v-icon small :color="statusName ? 'primary' : ''">
-                mdi-filter
-              </v-icon>
-            </v-btn>
-          </template>
-          <div style="background-color: white; width: 200px; padding: 10px">
-            <v-select
-              flat
-              small
-              multiple
-              clearable
-              v-model="statusName"
-              label="請選擇"
-              :items="columnValueList(header.value)"
-            >
-            </v-select>
-            <v-btn
-              @click="statusName = ''"
-              small
-              text
-              color="primary"
-              class="ml-2 mb-2"
-              >清除</v-btn
-            >
-          </div>
-        </v-menu>
-      </template>
-      <template v-slot:header.name="{ header }">
-        {{ header.text }}
-        <v-menu offset-y :close-on-content-click="false">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-bind="attrs" v-on="on">
-              <v-icon small :color="dessertName ? 'primary' : ''">
-                mdi-filter
-              </v-icon>
-            </v-btn>
-          </template>
-          <div style="background-color: white; width: 280px">
-            <v-text-field
-              v-model="dessertName"
-              class="pa-4"
-              type="text"
-              label="輸入搜尋"
-              :autofocus="true"
-            ></v-text-field>
-            <v-btn
-              @click="dessertName = ''"
-              small
-              text
-              color="primary"
-              class="ml-2 mb-2"
-              >清除</v-btn
-            >
-          </div>
-        </v-menu>
+      <template
+        v-for="(header, index) in headers"
+        v-slot:[`header.${header.value}`]="{ header }"
+      >
+        <thead>
+          <tr>
+            <th>
+              <span style="font-size: 13.5px; ">{{ header.text }}</span>
+            </th>
+
+            <th v-if="header.text != '功能'">
+              <v-menu offset-y :close-on-content-click="false">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn icon v-bind="attrs" v-on="on">
+                    <v-icon :id="'color' + index" small color="">
+                      mdi-filter
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <div style="background-color: white; width: 280px">
+                  <v-text-field
+                    @keyup="filteredDesserts(index, header.filterName)"
+                    :id="'input' + index"
+                    class="pa-4"
+                    type="text"
+                    label="輸入搜尋"
+                    :autofocus="true"
+                  ></v-text-field>
+                  <v-btn
+                    :id="'clean' + index"
+                    @click="cleanDesserts(index, header.filterName)"
+                    small
+                    text
+                    color="primary"
+                    class="ml-2 mb-2"
+                    >清除</v-btn
+                  >
+                </div>
+              </v-menu>
+            </th>
+          </tr>
+        </thead>
       </template>
       <template v-slot:item.statusName="{ item }">
         <v-chip :color="getColor(item.statusName)" dark>
@@ -92,18 +77,18 @@
       </template>
       <template v-slot:top>
         <v-toolbar flat>
-          <v-text-field
-            v-model="search"
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-          <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                新增承辦人
+              <v-btn
+                small
+                color="#635BFF"
+                dark
+                class="mb-2"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon small left> mdi-account-plus-outline </v-icon>
+                新增報名
               </v-btn>
             </template>
             <v-card>
@@ -228,14 +213,44 @@
               </v-card-actions>
             </v-card>
           </v-dialog>
+          <v-spacer></v-spacer>
+          <v-btn
+            class="ma-3"
+            small
+            outlined
+            color="indigo"
+            style="font-weight: bold"
+          >
+            <v-icon small left> mdi-card-account-details-outline </v-icon>
+            產生應試資料
+          </v-btn>
+          <v-divider class="mx-1" inset vertical></v-divider>
+          <v-btn
+            class="ma-2"
+            small
+            outlined
+            color="indigo"
+            style="font-weight: bold"
+          >
+            <v-icon small left> mdi-tray-arrow-down </v-icon>
+            匯入
+          </v-btn>
+          <v-btn
+            class="ma-2"
+            small
+            outlined
+            color="indigo"
+            style="font-weight: bold"
+          >
+            <v-icon small left> mdi-file-upload-outline </v-icon>
+            匯出
+          </v-btn>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-        <v-icon small class="mr-2" @click="deleteItem(item)">
-          mdi-delete
-        </v-icon>
-        <v-icon small class="mr-2" @click="show()"> mdi-delete </v-icon>
+        <v-icon class="mr-2" @click="editItem(item)"
+          >mdi-text-box-edit-outline</v-icon
+        >
       </template>
     </v-data-table>
   </div>
@@ -244,49 +259,28 @@
 <script>
 export default {
   data: () => ({
-    // width: '50%',
-    overlay: false,
-    items: [
-      {
-        src: 'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg'
-      },
-      {
-        src: 'https://cdn.vuetifyjs.com/images/carousel/sky.jpg'
-      },
-      {
-        src: 'https://scontent-tpe1-1.xx.fbcdn.net/v/t39.30808-6/283755359_5412721285416863_8270869590315033899_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=8bfeb9&_nc_ohc=l6A5-SmWqcYAX9SntHB&_nc_ht=scontent-tpe1-1.xx&oh=00_AT_fPbSDY7ZvF_ELIIdUDVB1XrsFpsCUwMj8HPy1npTe7A&oe=62A7857F'
-      },
-      {
-        src: 'https://cdn.vuetifyjs.com/images/carousel/planet.jpg'
-      },
-      {
-        src: 'https://hujiyi.gitee.io/2021/01/20/create-a-vue-app-based-vuetify-and-leancloud-part-II/filelist.png'
-      },
-      {
-        src: 'https://media.istockphoto.com/photos/taipei-city-panorama-in-taiwan-picture-id1209191587'
-      }
-    ],
-    item2: [],
-    dessertName: '',
+    keyWord: '',
+    keyClumn: '',
+    dessertChineseName: '',
+    key: 0,
     statusName: '',
     valid: true,
     levelStatus: true,
     defaultOlympic: [],
-    search: '',
     dialog: false,
     dialogDelete: false,
     headers: [
-      // {
-      //   text: '奧林匹亞',
-      //   align: 'start',
-      //   value: 'olympic'
-      // },
-      { text: '帳號狀態', value: 'statusName' },
-      { text: '學校', value: 'school_name' },
-      { text: '姓名', value: 'name' },
-      { text: '信箱', value: 'email' },
-      { text: '公務電話', value: 'tel' },
-      { text: '功能', value: 'actions', sortable: false }
+      { text: '姓名(中)', value: 'chineseName', filterName: 'chineseName' },
+      { text: '姓名(英)', value: 'englishName', filterName: 'englishName' },
+      { text: '識別碼', value: 'idCard', filterName: 'idCard' },
+      { text: '學校', value: 'schoolName2', filterName: 'schoolName2' },
+      { text: '年級', value: 'grade', filterName: 'grade' },
+      { text: '生日', value: 'birthday', filterName: 'birthday' },
+      { text: '信箱', value: 'email', filterName: 'email' },
+      { text: '指導老師', value: 'teacher', filterName: 'teacher' },
+      { text: '備註', value: 'remark', filterName: 'remark' },
+      { text: '考區', value: 'areaName', filterName: 'areaName' },
+      { text: '功能', value: 'actions' }
     ],
     emailRules: [
       v => !!v || '帳號(信箱)不能為空',
@@ -305,6 +299,7 @@ export default {
     defaultStatus: '2',
     olympicItem: ['TMO', 'IPHO', 'TWICHO', 'CTBO', 'IESO', 'TWIJSO', 'TOI'],
     desserts: [],
+    dessertsTemp: [],
     editedIndex: -1,
     editedItem: {
       olympic: '',
@@ -329,39 +324,9 @@ export default {
       return this.editedIndex === -1 ? '新增承辦人' : '更改承辦人資訊'
     },
 
-    filteredDesserts () {
-      const conditions = []
-      console.log(55)
-      if (this.dessertName) {
-        conditions.push(this.filterDessertName)
-      }
-
-      if (this.statusName) {
-        conditions.push(this.filterStatusName)
-      }
-      console.log(conditions)
-      if (conditions.length > 0) {
-        console.log(1)
-        return this.desserts.filter((dessert) => {
-          return conditions.every((condition) => {
-            return condition(dessert)
-          })
-        })
-      }
-
-      return this.desserts
-    },
-
-    width () {
-      console.log(document.documentElement.clientWidth)
-
-      if (document.documentElement.clientWidth >= 1600) {
-        return '70%'
-      } else {
-        return '50%'
-      }
+    id () {
+      return this.$route.params.id
     }
-
   },
 
   watch: {
@@ -374,11 +339,45 @@ export default {
   },
 
   methods: {
+    filteredDesserts (index, filterName) {
+      const value = document.getElementById('input' + index).value
+
+      document.getElementById('color' + index).style.color = 'rgb(25 118 210)'
+
+      if (document.getElementById('input' + index).value != null) {
+        this.desserts = this.dessertsTemp.filter((dessert) => {
+          return dessert[filterName].toLowerCase().includes(value.toLowerCase())
+        })
+      }
+
+      return this.desserts
+    },
+
+    cleanDesserts (index, filterName) {
+      document.getElementById('input' + index).value = ''
+
+      document.getElementById('color' + index).style.color = ''
+
+      this.desserts = this.dessertsTemp.filter((dessert) => {
+        if (dessert[filterName] === '' || dessert[filterName] == null) {
+          return dessert
+        } else {
+          return !dessert[filterName].toLowerCase().includes(null)
+        }
+      })
+
+      return this.desserts
+    },
+
     show () {
       this.overlay = true
       this.drawer = false
-      console.log(this.drawer)
     },
+    reload () {
+      this.titleName = this.$store.dispatch('title', '選拔管理9')
+      return this.$store.state.title
+    },
+
     editItem (item) {
       if (this.level.value === '2') {
         this.defaultOlympic = item.olympic.split(',')
@@ -440,16 +439,6 @@ export default {
       this.close()
     },
 
-    filterDessertName (item) {
-      console.log(item)
-      console.log(item.name.toLowerCase().includes(this.dessertName.toLowerCase()))
-      return item.name.toLowerCase().includes(this.dessertName.toLowerCase())
-    },
-
-    filterStatusName (item) {
-      return item.statusName.includes(this.statusName)
-    },
-
     columnValueList (val) {
       return this.desserts.map(d => d[val])
     },
@@ -471,27 +460,30 @@ export default {
       else return 'blue'
     },
 
-    async getSchoolUsers () {
+    async getPersonnelInfo () {
       const data = {}
       data.AT = this.AT.value
+      data.id = this.id
 
       await this.axios
-        .post(this.GLOBAL.APISERVERURL + '/getSchoolUsers', data)
+        .post(this.GLOBAL.APISERVERURL + '/getPersonnel', data)
         .then((response) => {
+          // console.log(response.data)
           if (response.data.code === 200) {
             this.desserts = response.data.resultData
-            const that = this
-            this.desserts.forEach(function (data) {
-              data = that.changeData(data)
+            this.dessertsTemp = response.data.resultData
+            // const that = this
+            // this.desserts.forEach(function (data) {
+            //   data = that.changeData(data)
 
-              data.olympicSelect = data.olympic.split(',')
-            })
+            //   data.olympicSelect = data.olympic.split(',')
+            // })
             // console.log(this.desserts)
           } else if (response.data.code === 400) {
             if (this.getAT()) {
               const that = this
               setTimeout(function () {
-                that.getSchoolUsers()
+                that.getPersonnelInfo()
               }, 1000)
             } else {
               location.href = '/login'
@@ -503,29 +495,11 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
-    },
-
-    test (key) {
-      // console.log(key)
-      const i = key
-
-      this.item2 = this.items.slice(i, this.items.length)
-      this.item2 = this.item2.concat(this.items.slice(0, key))
-      // for (i; i < this.items.length; i++) {
-      //   this.item2.push(this.items[i])
-      // }
-
-      // for (let j = 0; j < key; j++) {
-      //   console.log(j)
-      //   this.item2.push(this.items[j])
-      // }
-      // console.log(this.items)
-      // console.log(this.item2)
     }
   },
 
   async mounted () {
-    // console.log(this.level.value)
+    this.reload()
     if (this.level.value === '1') {
       this.levelStatus = false
     } else {
@@ -533,10 +507,7 @@ export default {
     }
 
     await this.renewLT()
-    await this.getSchoolUsers()
-    // this.items.splice(1, 1)
-    this.test(0)
-    // console.log(this.drawer)
+    await this.getPersonnelInfo()
   }
 }
 </script>

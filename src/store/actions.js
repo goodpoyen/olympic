@@ -4,16 +4,17 @@
 import * as types from './mutations_type.js'
 
 export const actionIncrease = ({ commit }) => {
-  console.log('actionIncrease')
   commit(types.INCREASE)
 }
 
 export const actionDecrease = ({ commit }) => {
-  console.log('actionDecrease')
   commit(types.DECREASE)
 }
 
-export const test = ({ commit }, word) => {
-  // console.log(word)
-  commit(types.TEST, word)
+export const title = ({ commit }, word) => {
+  commit(types.title, word)
+}
+
+export const personnlFilter = ({ commit }, word) => {
+  commit(types.personnlFilter, word)
 }

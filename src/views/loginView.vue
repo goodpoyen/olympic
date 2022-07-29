@@ -181,16 +181,7 @@ export default {
     }
   },
   computed: {
-    test8 () {
-      // console.log(1)
-      this.$store.dispatch('test', 'balabala')
-      // console.log(this.$store.dispatch('test', 'balabala'))
-      // console.log(this.$store.state.test)
-      return this.$store.state.test
-    },
-    id () {
-      return this.$route.params.id
-    }
+
   },
 
   methods: {
@@ -257,9 +248,6 @@ export default {
   mounted () {
     this.identifyCode = ''
     this.makeCode(this.identifyCodes, 4)
-    // console.log(this.test8)
-    console.log(this.id)
-    // console.log(4)
   }
 }
 </script>

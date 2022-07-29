@@ -1,3 +1,4 @@
 export const INCREASE = 'INCREASE'
 export const DECREASE = 'DECREASE'
-export const TEST = 'TEST'
+export const title = 'title'
+export const personnlFilter = 'personnlFilter'

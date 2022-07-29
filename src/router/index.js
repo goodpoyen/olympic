@@ -37,6 +37,12 @@ const routes = [
         component: () => import('../components/selection.vue')
       },
       {
+        path: 'personnelInfo/:id',
+        name: 'personnelInfo',
+        props: true,
+        component: () => import('../components/personnelInfo.vue')
+      },
+      {
         path: 'examArea/:id',
         name: 'examArea',
         component: () => import('../components/examArea.vue')
