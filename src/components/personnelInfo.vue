@@ -3,19 +3,17 @@
     <div style="margin: 20px; font-size: 14px; font-weight: bold">
       選拔模組:
       <v-btn
-        x-small
+        small
         rounded
         color="#E9F8FF"
         style="margin-left: 11px; margin-top: -2px"
       >
-        <v-icon small left> mdi-note-check-outline </v-icon>測驗
+        <v-icon small left> mdi-note-check-outline </v-icon>
+        <p style="font-size: 14px; margin-top: 13px">測驗</p>
       </v-btn>
       <div style="display: inline; margin: 52px">
         選拔名稱:
-        <div
-          class="text-decoration-underline single-line"
-          style="display: inline; margin: 13px"
-        >
+        <div class="single-line" style="display: inline; margin: 13px">
           海選階段
         </div>
       </div>
@@ -34,7 +32,7 @@
         <thead>
           <tr>
             <th>
-              <span >{{ header.text }}</span>
+              <span>{{ header.text }}</span>
             </th>
 
             <th v-if="header.text != '功能'">
@@ -88,7 +86,7 @@
                 v-on="on"
               >
                 <v-icon small left> mdi-account-plus-outline </v-icon>
-                新增報名
+                <p style="font-size: 13px; margin-top: 16px">新增報名</p>
               </v-btn>
             </template>
             <v-card>
@@ -222,7 +220,7 @@
             style="font-weight: bold"
           >
             <v-icon small left> mdi-card-account-details-outline </v-icon>
-            產生應試資料
+            <p style="font-size: 13px; margin-top: 16px">產生應試資料</p>
           </v-btn>
           <v-divider class="mx-1" inset vertical></v-divider>
           <v-btn
@@ -233,7 +231,7 @@
             style="font-weight: bold"
           >
             <v-icon small left> mdi-tray-arrow-down </v-icon>
-            匯入
+            <p style="font-size: 13px; margin-top: 16px">匯入</p>
           </v-btn>
           <v-btn
             class="ma-2"
@@ -243,14 +241,14 @@
             style="font-weight: bold"
           >
             <v-icon small left> mdi-file-upload-outline </v-icon>
-            匯出
+            <p style="font-size: 13px; margin-top: 16px">匯出</p>
           </v-btn>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
         <v-icon class="mr-2" @click="editItem(item)"
-          >mdi-text-box-edit-outline</v-icon
-        >
+          >mdi-text-box-edit-outline
+        </v-icon>
       </template>
     </v-data-table>
   </div>

@@ -67,7 +67,7 @@
                 v-on="on"
               >
                 <v-icon small left> mdi-domain </v-icon>
-                新增考區
+                <p style="font-size: 13px; margin-top: 16px">新增考區</p>
               </v-btn>
             </template>
             <v-card>
