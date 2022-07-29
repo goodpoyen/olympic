@@ -417,7 +417,7 @@ export default {
       await this.axios
         .post(this.GLOBAL.APISERVERURL + '/getClassRoom', data)
         .then((response) => {
-          console.log(response.data)
+          // console.log(response.data)
           if (response.data.code === 200) {
             this.desserts = response.data.resultData
             this.dessertsTemp = response.data.resultData

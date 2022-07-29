@@ -1,9 +1,13 @@
 <template>
   <div>
     <v-data-table
+      v-model="selected"
       :headers="headers"
       :items="desserts"
       multi-sort
+      :single-select="singleSelect"
+      show-select
+      item-key="examCode"
       class="elevation-1"
     >
       <template
@@ -57,19 +61,6 @@
       <template v-slot:top>
         <v-toolbar flat>
           <v-dialog v-model="dialog" max-width="500px">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                small
-                color="#635BFF"
-                dark
-                class="mb-2"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-icon small left> mdi-domain </v-icon>
-                <p style="font-size: 13px; margin-top: 16px">新增考區</p>
-              </v-btn>
-            </template>
             <v-card>
               <v-card-title>
                 <span class="text-h5">{{ formTitle }}</span>
@@ -195,15 +186,29 @@
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon class="mr-2" @click="editItem(item)">
-          mdi-download-box-outline
+        <v-icon class="mr-4" @click="close"> mdi-file-eye-outline </v-icon>
+        <v-icon class="mr-4" @click="close">
+          mdi-card-account-details-outline
         </v-icon>
-        <v-icon class="mr-2" @click="editItem(item)">
-          mdi-text-box-edit-outline
-        </v-icon>
-        <v-icon class="mr-2" @click="deleteItem(item)">
-          mdi-trash-can-outline
-        </v-icon>
+        <v-icon class="mr-4" @click="close"> mdi-license </v-icon>
+      </template>
+      <template v-slot:item.score="{ item }">
+        <!-- <br /> -->
+        <v-text-field
+          dense
+          v-model="item.score"
+          outlined
+          style="width: 80px; top: 11px;"
+        ></v-text-field>
+      </template>
+      <template v-slot:item.pr="{ item }">
+        <!-- <br /> -->
+        <v-text-field
+          dense
+          v-model="item.pr"
+          outlined
+          style="width: 80px; top: 11px;"
+        ></v-text-field>
       </template>
     </v-data-table>
   </div>
@@ -212,6 +217,8 @@
 <script>
 export default {
   data: () => ({
+    singleSelect: false,
+    selected: [],
     keyWord: '',
     keyClumn: '',
     dessertChineseName: '',
@@ -223,11 +230,12 @@ export default {
     dialog: false,
     dialogDelete: false,
     headers: [
-      { text: '考區代碼', value: 'codeNmae', filterName: 'codeNmae' },
+      { text: '應試號碼', value: 'examCode', filterName: 'examCode' },
+      { text: '姓名', value: 'chineseName', filterName: 'chineseName' },
       { text: '考區名稱', value: 'areaName', filterName: 'areaName' },
-      { text: '地址', value: 'address', filterName: 'address' },
-      { text: '總座位數', value: 'totalSeat', filterName: 'totalSeat' },
-      { text: '報名人數', value: 'totalSignup', filterName: 'totalSignup' },
+      { text: '座號', value: 'searNumber', filterName: 'searNumber' },
+      { text: '成績', value: 'score', filterName: 'score' },
+      { text: 'PR值', value: 'pr', filterName: 'pr' },
       { text: '功能', value: 'actions' }
     ],
     emailRules: [
@@ -408,13 +416,13 @@ export default {
       else return 'blue'
     },
 
-    async getExamAreaInfo () {
+    async getContestantsInfo () {
       const data = {}
       data.AT = this.AT.value
       data.id = this.id
 
       await this.axios
-        .post(this.GLOBAL.APISERVERURL + '/getExamArea', data)
+        .post(this.GLOBAL.APISERVERURL + '/getContestants', data)
         .then((response) => {
           // console.log(response.data)
           if (response.data.code === 200) {
@@ -422,16 +430,14 @@ export default {
             this.dessertsTemp = response.data.resultData
             // const that = this
             // this.desserts.forEach(function (data) {
-            //   data = that.changeData(data)
-
-            //   data.olympicSelect = data.olympic.split(',')
+            //   console.log(this.desserts[data])
             // })
             // console.log(this.desserts)
           } else if (response.data.code === 400) {
             if (this.getAT()) {
               const that = this
               setTimeout(function () {
-                that.getExamAreaInfo()
+                that.getContestantsInfo()
               }, 1000)
             } else {
               location.href = '/login'
@@ -455,7 +461,7 @@ export default {
     }
 
     await this.renewLT()
-    await this.getExamAreaInfo()
+    await this.getContestantsInfo()
   }
 }
 </script>

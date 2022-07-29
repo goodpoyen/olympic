@@ -8,7 +8,7 @@
         color="#E9F8FF"
         style="margin-left: 11px; margin-top: -2px"
       >
-        <v-icon small left> mdi-note-check-outline </v-icon>
+        <v-icon small left> mdi-notebook-edit-outline </v-icon>
         <p style="font-size: 14px; margin-top: 13px">測驗</p>
       </v-btn>
       <div style="display: inline; margin: 52px">
